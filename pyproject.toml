@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "corpus_distance"
+version = "0.0.1"
+authors = [
+  { name="Ilia Afanasev", email="szrnamerg@gmail.com" },
+]
+description = "Python package for measuring distance between the lects represented by small raw corpora"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/The-One-Who-Speaks-and-Depicts/corpus_distance"
+Issues = "https://github.com/The-One-Who-Speaks-and-Depicts/corpus_distance/issues"
