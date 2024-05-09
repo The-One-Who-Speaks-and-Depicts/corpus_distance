@@ -5,10 +5,15 @@ from pandas import DataFrame
 
 def load_data(content_directory: str , split: int = 1) -> DataFrame:
     """
-    Takes directory and size share, and returns a dataframe with texts as first column and lect names as second. 
+    Takes directory and size share,
+    and returns a dataframe with texts 
+    as first column and lect names as second. 
  
     Args:
-        content_directory (string): path to the directory with files of the lects. Files should have TEXT.LECT.txt style of naming, for example, Gospel.Croatian.txt.
+        content_directory (string): path to the directory with files of the lects.
+        Files should have TEXT.LECT.txt style of namingю
+        For example, Gospel.Croatian.txt.
+
         split (int): share (from 0 to 1).
  
     Returns:
