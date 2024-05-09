@@ -1,3 +1,12 @@
+"""
+Data loading model contains functions load_data
+and load_default_data.
+Load_data is used for loading user-defined data in a specific format,
+while load_default_data performs the same transformations for
+a demo dataset of three standard Slavic Gospels (Slovak, Slovenian, Croatian) 
+"""
+
+
 import os
 from itertools import islice
 from math import ceil
