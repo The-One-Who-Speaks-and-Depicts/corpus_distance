@@ -11,6 +11,7 @@ import os
 from itertools import islice
 from math import ceil
 from pandas import DataFrame
+import importlib
 
 def load_data(content_directory: str , split: int = 1) -> DataFrame:
     """
@@ -20,7 +21,7 @@ def load_data(content_directory: str , split: int = 1) -> DataFrame:
  
     Args:
         content_directory (string): path to the directory with files of the lects.
-        Files should have TEXT.LECT.txt style of namingю
+        Files should have TEXT.LECT.txt style of naming.
         For example, Gospel.Croatian.txt.
 
         split (int): share (from 0 to 1).
@@ -44,4 +45,4 @@ def load_data(content_directory: str , split: int = 1) -> DataFrame:
     del texts
     return df
 
-# TODO: import default data
+# TODO: load default data
