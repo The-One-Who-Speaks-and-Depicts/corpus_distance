@@ -1,2 +1,3 @@
 include pyproject.toml
 recursive-include src/corpus_distance/data *.csv
+recursive-include src/corpus_distance/data *.json

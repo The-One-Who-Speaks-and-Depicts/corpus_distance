@@ -45,7 +45,6 @@ def load_data(content_directory: str , split: int = 1) -> DataFrame:
                 split_text = ' '.join(list(islice(content, ceil(len(content)*split))))
                 texts[split_text] = lect
     df = DataFrame(texts.items(), columns=['text', 'lect'])
-    del texts
     return df
 
 
