@@ -10,7 +10,7 @@ import os
 from itertools import islice
 from math import ceil
 from pandas import DataFrame, read_csv
-from importlib import resources
+import corpus_distance.data.data_resources as datares
 
 
 
@@ -58,5 +58,4 @@ def load_default_data() -> DataFrame:
         df: A dataframe with texts as first column and lect names as a second. 
 
     """
-    with resources.path("corpus_distance.data", "gospels.csv") as df:
-        return read_csv(df)
+    return datares.data_df
