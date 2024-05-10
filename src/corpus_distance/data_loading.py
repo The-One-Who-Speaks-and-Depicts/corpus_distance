@@ -6,10 +6,12 @@ while load_default_data performs the same transformations for
 a demo dataset of three standard Slavic Gospels (Slovak, Slovenian, Croatian) 
 """
 
+
+
 import os
 from itertools import islice
 from math import ceil
-from pandas import DataFrame, read_csv
+from pandas import DataFrame
 import corpus_distance.data.data_resources as datares
 
 
@@ -45,6 +47,7 @@ def load_data(content_directory: str , split: int = 1) -> DataFrame:
     df = DataFrame(texts.items(), columns=['text', 'lect'])
     del texts
     return df
+
 
 def load_default_data() -> DataFrame:
     """
