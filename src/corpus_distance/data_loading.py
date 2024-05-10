@@ -6,12 +6,13 @@ while load_default_data performs the same transformations for
 a demo dataset of three standard Slavic Gospels (Slovak, Slovenian, Croatian) 
 """
 
-
 import os
 from itertools import islice
 from math import ceil
-from pandas import DataFrame
-import importlib
+from pandas import DataFrame, read_csv
+from importlib import resources
+
+
 
 def load_data(content_directory: str , split: int = 1) -> DataFrame:
     """
@@ -45,4 +46,17 @@ def load_data(content_directory: str , split: int = 1) -> DataFrame:
     del texts
     return df
 
-# TODO: load default data
+def load_default_data() -> DataFrame:
+    """
+
+    Wrapping of the default data for simplified use.
+    Default data is the Croatian, Slovak and Slovenian 
+    John's Gospels, each containing
+    approximately 19,000 tokens.
+
+    Returns: 
+        df: A dataframe with texts as first column and lect names as a second. 
+
+    """
+    with resources.path("corpus_distance.data", "gospels.csv") as df:
+        return read_csv(df)
