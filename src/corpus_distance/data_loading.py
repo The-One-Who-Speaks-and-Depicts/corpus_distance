@@ -7,10 +7,14 @@ a demo dataset of three standard Slavic Gospels (Slovak, Slovenian, Croatian)
 """
 
 
+
 import os
 from itertools import islice
 from math import ceil
 from pandas import DataFrame
+import corpus_distance.data.data_resources as datares
+
+
 
 def load_data(content_directory: str , split: int = 1) -> DataFrame:
     """
@@ -20,7 +24,7 @@ def load_data(content_directory: str , split: int = 1) -> DataFrame:
  
     Args:
         content_directory (string): path to the directory with files of the lects.
-        Files should have TEXT.LECT.txt style of namingю
+        Files should have TEXT.LECT.txt style of naming.
         For example, Gospel.Croatian.txt.
 
         split (int): share (from 0 to 1).
@@ -44,4 +48,17 @@ def load_data(content_directory: str , split: int = 1) -> DataFrame:
     del texts
     return df
 
-# TODO: import default data
+
+def load_default_data() -> DataFrame:
+    """
+
+    Wrapping of the default data for simplified use.
+    Default data is the Croatian, Slovak and Slovenian 
+    John's Gospels, each containing
+    approximately 19,000 tokens.
+
+    Returns: 
+        df: A dataframe with texts as first column and lect names as a second. 
+
+    """
+    return datares.data_df
