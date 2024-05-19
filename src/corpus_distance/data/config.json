@@ -1,0 +1,38 @@
+{
+    "store_path": "default",
+    "metrics_name": "default_metrics_name",
+    "data": {
+        "content_path": "default",
+        "split": 1,
+        "lda_params": {
+            "num_topics": 10,
+            "alpha": "auto",
+            "epochs": 300,
+            "passes": 500
+        },
+        "topic_modelling": false,
+        "fasttext_params": {
+            "vector_size": 128,
+            "window": 15,
+            "min_count": 3,
+            "workers": 4,
+            "epochs": 300,
+            "seed": 42,
+            "sg": 1
+        }
+    },
+    "hybridisation_parameters": {
+        "soerensen": true,
+        "hybridisation": true,
+        "hybridisation_as_array": true,
+        "metrics": "corpus_distance.distance_measurement.string_similarity.jaro_vector_wrapper",
+        "alphabet_normalisation": true
+    },
+    "clusterisation_parameters": {
+        "data_name": "default_data_name",
+        "outgroup": "default_outgroup_name",
+        "metrics": "default_metrics_name",
+        "classification_method": "upgma",
+        "store_path": ""
+    }
+}
