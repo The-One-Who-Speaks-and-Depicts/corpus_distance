@@ -1,0 +1,40 @@
+name: 
+
+on:
+  push:
+    branches: [ dev ]
+
+  workflow_dispatch:
+  
+jobs:
+
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Install building utils
+        run: |
+          python3 -m pip install --upgrade build
+          python3 -m pip install --upgrade twine
+      - name: Create package
+        run: |
+          python3 -m build
+      - name: Deploy package to testPyPI
+        run: |
+          python3 -m twine upload --repository testpypi dist/*
+      - name: Test package installment
+        run: |
+          python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps corpus_distance
+          python
+          from importlib.metadata import version
+          import corpus_distance
+          version('corpus_distance')
+          exit()
+          pip uninstall corpus_distance
+
+
