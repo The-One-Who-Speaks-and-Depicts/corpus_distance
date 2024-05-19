@@ -29,10 +29,10 @@
         "alphabet_normalisation": true
     },
     "clusterisation_parameters": {
-        "data_name": "default_data_name",
-        "outgroup": "default_outgroup_name",
+        "data_name": "Modern Standard Slavic",
+        "outgroup": "Slovak",
         "metrics": "default_metrics_name",
         "classification_method": "upgma",
-        "store_path": ""
+        "store_path": "default"
     }
 }
