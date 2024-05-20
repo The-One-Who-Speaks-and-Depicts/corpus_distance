@@ -82,3 +82,4 @@ def visualise_tree(tree: Phylo.BaseTree.Tree, metrics: str, data_name: str,
     axes = fig.add_subplot(1, 1, 1)
     Phylo.draw(tree, axes=axes, show_confidence=False, do_show=False)
     plt.savefig(join(store_path, "phylogeny_" + metrics + "_" + data_name + ".png"))
+    plt.close()
