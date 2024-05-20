@@ -104,14 +104,14 @@ def set_lda_params(lda_cfg: dict) -> LDAParams:
         lda_params(LDAParams): full set of LDAParams for the model to train on 
     """
     lda_params = LDAParams()
-    if lda_cfg.num_topics:
-        lda_params.num_topics = lda_cfg.num_topics
-    if lda_cfg.alpha:
-        lda_params.alpha = lda_cfg.alpha
-    if lda_cfg.epochs:
-        lda_params.epochs = lda_cfg.epochs
-    if lda_cfg.lda_params.passes:
-        lda_params.passes = lda_cfg.passes
+    if lda_cfg["num_topics"]:
+        lda_params.num_topics = lda_cfg["num_topics"]
+    if lda_cfg["alpha"]:
+        lda_params.alpha = lda_cfg["alpha"]
+    if lda_cfg["epochs"]:
+        lda_params.epochs = lda_cfg["epochs"]
+    if lda_cfg["passes"]:
+        lda_params.passes = lda_cfg["passes"]
     return lda_params
 
 
@@ -129,20 +129,20 @@ def set_fast_text_params(fasttext_cfg: dict) -> FastTextParams:
         fasttext_params(FastTextParams): full set of FastTextParams for the model to train on
     """
     fasttext_params = FastTextParams()
-    if fasttext_cfg.vector_size:
-        fasttext_params.vector_size = fasttext_cfg.vector_size
-    if fasttext_cfg.window:
-        fasttext_params.window = fasttext_cfg.window
-    if fasttext_cfg.min_count:
-        fasttext_params.min_count = fasttext_cfg.min_count
-    if fasttext_cfg.workers:
-        fasttext_params.workers = fasttext_cfg.workers
-    if fasttext_cfg.epochs:
-        fasttext_params.epochs = fasttext_cfg.epochs
-    if fasttext_cfg.seed:
-        fasttext_params.seed = fasttext_cfg.seed
-    if fasttext_cfg.sg:
-        fasttext_params.sg = fasttext_cfg.sg
+    if fasttext_cfg["vector_size"]:
+        fasttext_params.vector_size = fasttext_cfg["vector_size"]
+    if fasttext_cfg["window"]:
+        fasttext_params.window = fasttext_cfg["window"]
+    if fasttext_cfg["min_count"]:
+        fasttext_params.min_count = fasttext_cfg["min_count"]
+    if fasttext_cfg["workers"]:
+        fasttext_params.workers = fasttext_cfg["workers"]
+    if fasttext_cfg["epochs"]:
+        fasttext_params.epochs = fasttext_cfg["epochs"]
+    if fasttext_cfg["seed"]:
+        fasttext_params.seed = fasttext_cfg["seed"]
+    if fasttext_cfg["sg"]:
+        fasttext_params.sg = fasttext_cfg["sg"]
     return fasttext_params
 
 
@@ -160,16 +160,16 @@ def set_data_configuration(data_cfg: dict) -> DataParameters:
         data_params(DataParameters): full set of DataParameters for the model to train on
     """
     data_params = DataParameters()
-    if (data_cfg.content_path and data_cfg.content_path != "default"):
-        data_params.content_path = data_cfg.content_path
-    if data_cfg.split:
-        data_params.split = data_params.split
-    if data_cfg.lda_params:
-        data_params.lda_params = set_lda_params(data_cfg.lda_params)
+    if (data_cfg["content_path"] and data_cfg["content_path"] != "default"):
+        data_params.content_path = data_cfg["content_path"]
+    if data_cfg["split"]:
+        data_params.split = data_cfg["split"]
+    if data_cfg["lda_params"]:
+        data_params.lda_params = set_lda_params(data_cfg["lda_params"])
     if "topic_modelling" in data_cfg.keys():
-        data_params.topic_modelling = data_cfg.topic_modelling
-    if data_cfg.fasttext_params:
-        data_params.fasttext_params = set_fast_text_params(data_cfg.fasttext_params)
+        data_params.topic_modelling = data_cfg["topic_modelling"]
+    if data_cfg["fasttext_params"]:
+        data_params.fasttext_params = set_fast_text_params(data_cfg["fasttext_params"])
     return data_params
 
 
@@ -189,18 +189,18 @@ def set_hybrid_configuration(hybrid_cfg: dict) -> HybridisationParameters:
     """
     hybrid_params = HybridisationParameters()
     if "soerensen" in hybrid_cfg.keys():
-        hybrid_params.soerensen = hybrid_cfg.soerensen
+        hybrid_params.soerensen = hybrid_cfg["soerensen"]
     if "hybridisation" in hybrid_cfg.keys():
-        hybrid_params.hybridisation = hybrid_cfg.hybridisation
+        hybrid_params.hybridisation = hybrid_cfg["hybridisation"]
     if "hybridisation_as_array" in hybrid_cfg.keys():
-        hybrid_params.hybridisation_as_array = hybrid_cfg.hybridisation_as_array
-    if hybrid_cfg.metrics:
-        function_string = hybrid_cfg.metrics
+        hybrid_params.hybridisation_as_array = hybrid_cfg["hybridisation_as_array"]
+    if hybrid_cfg["metrics"]:
+        function_string = hybrid_cfg["metrics"]
         mod_name, func_name = function_string.rsplit('.',1)
         mod = importlib.import_module(mod_name)
         hybrid_params.metrics = getattr(mod, func_name)
     if "alphabet_normalisation" in hybrid_cfg.keys():
-        hybrid_params.alphabet_normalisation = hybrid_cfg.alphabet_normalisation
+        hybrid_params.alphabet_normalisation = hybrid_cfg["alphabet_normalisation"]
     return hybrid_params
 
 
@@ -220,14 +220,14 @@ def set_metrics_name(
     Returns:
         metrics_name(str): a final metrics name
     """
-    if (cfg.metrics_name and cfg.metrics_name != "default_metrics_name"):
-        return cfg.metrics_name
+    if (cfg["metrics_name"] and cfg["metrics_name"] != "default_metrics_name"):
+        return cfg["metrics_name"]
     metrics_name = ""
-    if cfg.clusterisation_parameters.data_name:
-        metrics_name += f'{cfg.clusterisation_parameters.data_name}-'
-    if cfg.split:
-        metrics_name += f'{str(cfg.split)}-'
-    metrics_name += f'{str(cfg.topic_modelling)}-'
+    if cfg["clusterisation_parameters"]["data_name"]:
+        metrics_name += f'{cfg["clusterisation_parameters"]["data_name"]}-'
+    if cfg["data"]["split"]:
+        metrics_name += f'{str(cfg["data"]["split"])}-'
+    metrics_name += f'{str(cfg["data"]["topic_modelling"])}-'
     metrics_name += "DistRank-"
     metrics_name += str(hybridisation_parameters)
     return metrics_name
@@ -252,18 +252,18 @@ def set_clusterisation_parameters(clust_cfg: dict,
         for the package clusterisation
     """
     clust_params = ClusterisationParameters()
-    if clust_cfg.data_name:
-        clust_params.data_name = clust_cfg.data_name
-    if clust_cfg.outgroup:
-        clust_params.outgroup = clust_cfg.outgroup
+    if clust_cfg["data_name"]:
+        clust_params.data_name = clust_cfg["data_name"]
+    if clust_cfg["outgroup"]:
+        clust_params.outgroup = clust_cfg["outgroup"]
     clust_params.metrics = metrics_name
     clust_params.store_path = store_path
-    if clust_cfg.classification_method:
-        if clust_cfg.classification_method not in ["upgma", "nj"]:
+    if clust_cfg["classification_method"]:
+        if clust_cfg["classification_method"] not in ["upgma", "nj"]:
             raise ValueError("Only UPGMA and NJ classifiers are available")
-        if clust_cfg.classification_method == "upgma":
+        if clust_cfg["classification_method"] == "upgma":
             clust_params.classification_method = DistanceTreeConstructor().upgma
-        if clust_cfg.classification_method == "nj":
+        if clust_cfg["classification_method"] == "nj":
             clust_params.classification_method = DistanceTreeConstructor().nj
     return clust_params
 
@@ -281,17 +281,17 @@ def set_configuration(cfg: dict) -> ConfigurationParameters:
         joining user input with default parameters, if necessary
     """
     cfg_params = ConfigurationParameters()
-    cfg_params.store_path = set_storage_directory(cfg.store_path)
-    if cfg.data:
-        cfg_params.data_params = set_data_configuration(cfg.data)
-    if cfg.hybridisation_parameters:
+    cfg_params.store_path = set_storage_directory(cfg["store_path"])
+    if cfg["data"]:
+        cfg_params.data_params = set_data_configuration(cfg["data"])
+    if cfg["hybridisation_parameters"]:
         cfg_params.hybridisation_parameters =\
-            set_hybrid_configuration(cfg.hybridisation_parameters)
+            set_hybrid_configuration(cfg["hybridisation_parameters"])
     cfg_params.metrics_name = set_metrics_name(cfg, cfg_params.hybridisation_parameters)
-    if cfg.clusterisation_parameters:
+    if cfg["clusterisation_parameters"]:
         cfg_params.clusterisation_parameters =\
             set_clusterisation_parameters(
-                cfg.clusterisation_parameters,
+                cfg["clusterisation_parameters"],
                 cfg_params.metrics_name,
                 cfg_params.store_path
                 )
@@ -306,12 +306,12 @@ def perform_clusterisation(config_path: str = 'default') -> None:
     Parameters:
         config_path(str): path to json file with the required data
     """
-    logging.info("Setting configuration")
     cfg = set_configuration(
         config
         ) if config_path == 'default' else set_configuration(
             json.load(config_path)
             )
+    logging.info('Configuration set')
     logging.info("Reading data")
     data = assemble_dataset() if cfg.data_params.content_path == 'default' else assemble_dataset(
         cfg.data_params.content_path,

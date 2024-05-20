@@ -8,7 +8,6 @@ duplicating.
 import logging
 from pandas import DataFrame
 from numpy import percentile
-logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 def clear_stop_words(text: str, stop_words: list[str]) -> str:
     """
@@ -86,7 +85,8 @@ def delete_outliers(original_distribution: list[int|float]
             if not lower_boundary <= i <= upper_boundary
         ]
     if len(normalised_distribution) < 1:
-        raise ValueError("Original list is not a normal distribution")
+        logging.warning("Original distribution is not a normal distribution")
+        return original_distribution
     return normalised_distribution
 
 

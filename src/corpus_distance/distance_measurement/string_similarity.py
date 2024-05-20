@@ -4,7 +4,7 @@ wrappings for different string similarity measures,
 in order for them to be sufficiently
 integrated into the pipeline.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import Levenshtein
 from scipy.spatial.distance import euclidean
 from pyjarowinkler.distance import get_jaro_distance as jw
@@ -32,10 +32,10 @@ class StringSimilarityMeasurementInfo:
          string similarity measures)
     """
     str1: str = ""
-    vec1: dict = {}
+    vec1: dict = field (default_factory=dict)
     ent1: float = 0
     str2: str = ""
-    vec2: dict = {}
+    vec2: dict = field (default_factory=dict)
     ent2: float = 0
     alphabet_normalisation: bool = True
 
@@ -72,11 +72,11 @@ def vector_measure_wrapper(
         and strings_info.alphabet_normalisation):
         raise ValueError("There is no alphabet entropy information")
     sum_s1 = sum(
-    list(strings_info.vec1[strings_info.str1[i[0]]] for i in list(
+    list(strings_info.vec1[v] for _, v in list(
     enumerate(strings_info.str1
                 ))))
     sum_s2 = sum(
-    list(strings_info.vec2[strings_info.str2[i[0]]] for i in list(
+    list(strings_info.vec2[v] for _, v in list(
     enumerate(strings_info.str2
                 ))))
     diff = euclidean(sum_s1, sum_s2)
@@ -177,11 +177,11 @@ def jaro_vector_wrapper(strings_info: StringSimilarityMeasurementInfo) -> float:
     jaro = jw(strings_info.str1, strings_info.str2, winkler = False)/\
     max([len(strings_info.str1), len(strings_info.str2)])
     sum_s1 = sum(
-    list(strings_info.vec1[strings_info.str1[i[0]]] for i in list(
+    list(strings_info.vec1[v] for _, v in list(
     enumerate(strings_info.str1
                 ))))
     sum_s2 = sum(
-    list(strings_info.vec2[strings_info.str2[i[0]]] for i in list(
+    list(strings_info.vec2[v] for _, v in list(
     enumerate(strings_info.str2
                 ))))
     diff = euclidean(sum_s1, sum_s2)

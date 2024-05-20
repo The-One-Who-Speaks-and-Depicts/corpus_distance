@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Callable
 from tqdm import tqdm
 from corpus_distance.distance_measurement.string_similarity\
-    import jaro_vector_wrapper
+    import jaro_vector_wrapper, StringSimilarityMeasurementInfo
 from corpus_distance.distance_measurement.frequency_metrics\
     import dist_rank
 from corpus_distance.cdutils import delete_outliers
@@ -86,12 +86,14 @@ def hybrid_for_single_lect(lects_information: LectPairInformation,
             # the first stage is two score a string similarity measure
             differences_for_a_single_n_gram.append(
                                     (b[0], abs(a[1] - b[1]),
-                                    string_similarity_measure(a[0], b[0],
-                                    lects_information.lect_a_vectors,
-                                    lects_information.lect_b_vectors,
-                                    alphabet_normalisation,
-                                    lects_information.lect_a_info,
-                                    lects_information.lect_b_info)
+                                    string_similarity_measure(
+                                        StringSimilarityMeasurementInfo(
+                                        str1 = a[0], vec1 = lects_information.lect_a_vectors,
+                                        ent1 = lects_information.lect_a_info, str2 = b[0],
+                                        vec2 = lects_information.lect_b_vectors,
+                                        ent2 = lects_information.lect_b_info,
+                                        alphabet_normalisation = alphabet_normalisation
+                                        ))
                                     /max(len(a[0]), len(b[0]))))
             # the next stage is two score the minimal value
             # of string similarity measure,
@@ -159,12 +161,12 @@ def hybrid(lects_information: LectPairInformation,
                                     metrics,
                                     alphabet_normalisation)
     flipped_lect = LectPairInformation(
-       lects_information.lect_b_n_grams,
-       lects_information.lect_a_n_grams,
-       lects_information.lect_b_vectors,
-       lects_information.lect_a_vectors,
-       lects_information.lect_b_info,
-       lects_information.lect_a_info
+       lect_a_n_grams=lects_information.lect_b_n_grams,
+       lect_b_n_grams=lects_information.lect_a_n_grams,
+       lect_a_vectors=lects_information.lect_b_vectors,
+       lect_b_vectors=lects_information.lect_a_vectors,
+       lect_a_info=lects_information.lect_b_info,
+       lect_b_info=lects_information.lect_a_info
     )
     diffs_b = hybrid_for_single_lect(flipped_lect,
                                     metrics,
@@ -266,7 +268,7 @@ def compare_lects_with_vectors(lects_information: LectPairInformation,
                               [j[0] for j in lects_information.lect_a_n_grams]
                             ],
         lect_a_vectors=lects_information.lect_a_vectors,
-        lect_b_vectors=lects_information.lect_b_n_grams,
+        lect_b_vectors=lects_information.lect_b_vectors,
         lect_a_info=lects_information.lect_a_info,
         lect_b_info=lects_information.lect_b_info
     )
@@ -282,7 +284,7 @@ def compare_lects_with_vectors(lects_information: LectPairInformation,
                 hybridisation_parameters.alphabet_normalisation
                 )
         # if the choice is to join all the results into a single array
-        if hybridisation_parameters.hybrid_together:
+        if hybridisation_parameters.hybridisation_as_array:
             # it is necessary to check, whether there is a single coincidence,
             # to escape potential errors
             if len(dist_ranks) > 0:
