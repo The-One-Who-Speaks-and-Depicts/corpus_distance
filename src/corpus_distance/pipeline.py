@@ -306,11 +306,11 @@ def perform_clusterisation(config_path: str = 'default') -> None:
     Parameters:
         config_path(str): path to json file with the required data
     """
-    cfg = set_configuration(
-        config
-        ) if config_path == 'default' else set_configuration(
-            json.load(config_path)
-            )
+    if config_path == 'default':
+        cfg = set_configuration(config)
+    else:
+        with open(config_path, 'r', encoding='utf-8') as inp:
+            cfg = set_configuration(json.load(inp))
     logging.info('Configuration set')
     logging.info("Reading data")
     data = assemble_dataset() if cfg.data_params.content_path == 'default' else assemble_dataset(
