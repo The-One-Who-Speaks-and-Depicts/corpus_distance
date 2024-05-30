@@ -1,5 +1,6 @@
 # Python package for measuring distance between the lects represented by small raw corpora
 ![pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11395683.svg)](https://doi.org/10.5281/zenodo.11395683)
 
 # What is it?
 
