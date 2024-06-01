@@ -1,6 +1,8 @@
 # Python package for measuring distance between the lects represented by small raw corpora
-![pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11395683.svg)](https://doi.org/10.5281/zenodo.11395683)
+
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)
 
 # What is it?
 
@@ -10,11 +12,11 @@ corpus_distance operates with 3-shingles, a sequences of 3 symbols, by which wor
 
 ## NB!
 
-The classification is going to be only (and extemely) preliminary, as it is by default language-agnostic and does not use preliminary expert judgements or linguistic information. Basically, the more effort is put into the actual data, the more reliable are final results. 
+The classification is going to be only (and extremely) preliminary, as it is by default language-agnostic and does not use preliminary expert judgements or linguistic information. Basically, the more effort is put into the actual data, the more reliable are final results. 
 
-In addition, the results may not be used as a proof of language relationship (external classification), only as a supporting evidence for tree topology (internal classification), as it is with any kind of phylogenetic methods in historical comparative studies.
+In addition, the results may not be used as a proof of language relationship (external classification), only as a supporting evidence for a tree topology (internal classification), as it is with any kind of phylogenetic methods in historical comparative studies.
 
-One more important notion is that one should be very careful with using this package for a distantly related lects. As it is with any kind of language-agnostic methods, they lose precision with the increase of distance between analysed groups. 
+One more important notion is that one should be very careful with using this package for a distantly related lects. As it is with any kind of language-agnostic methods, it loses precision with the increase of distance between analysed groups (Holman et al., 2008). 
 
 # How to install
 
@@ -27,6 +29,30 @@ pip install gensim
 pip install pyjarowinkler
 
 python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps --force-reinstall corpus_distance
+```
+
+## From PyPI (release version)
+
+```
+pip install corpus_distance
+```
+
+## From Docker
+
+1. Clone repository.
+```
+git clone https://github.com/The-One-Who-Speaks-and-Depicts/corpus_distance.git
+```
+2. Cd to the repository root directory.
+3. (optionally) Add your data and configuration file (see How to use/Preparation below), put both into the repository directory.
+4. Create Docker image.
+```
+sudo docker build --tag IMAGE_NAME .
+```
+IMAGE_NAME is a name of the docker image of your choice
+5. Run Docker image.
+```
+sudo docker run -i -t IMAGE_NAME /bin/bash
 ```
 
 # How to use
@@ -98,6 +124,8 @@ python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps --for
         }
     }
 ```
+7. In case you are using Docker, do not forget to put your data and configuration file into the repository directory before creating Docker image. 
+
 ## Running the code
 
 There are two ways of running the code: with prepared Jupyter Notebook, or independently.
@@ -106,7 +134,7 @@ There are two ways of running the code: with prepared Jupyter Notebook, or indep
 
 In the folder `example`, there is a tutorial notebook that outlines the inner workings of the package.
 
-### Using your own file
+### Using your own file (or from Docker console)
 
 After data and configuration are ready, open Python interpreter:
 
@@ -121,4 +149,4 @@ from corpus_distance.pipeline import perform_clusterisation
 perform_clusterisation(PATH_TO_CONFIG)
 ```
 
-PATH_TO_CONFIG here is a path to `config.json`.
+`PATH_TO_CONFIG` here is a path to `config.json`. This parameter may be empty, then the model performs clusterisation with default dataset (Modern Standard Slavic Gospels of John: Croatian, Slovak, Slovenian) and default parameters.
