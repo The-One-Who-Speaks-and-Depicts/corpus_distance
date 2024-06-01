@@ -1,6 +1,8 @@
 # Python package for measuring distance between the lects represented by small raw corpora
-![pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11395683.svg)](https://doi.org/10.5281/zenodo.11395683)
+
+![pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 
 # What is it?
 
@@ -27,6 +29,12 @@ pip install gensim
 pip install pyjarowinkler
 
 python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps --force-reinstall corpus_distance
+```
+
+## From PyPI (release version)
+
+```
+pip install corpus_distance
 ```
 
 # How to use
