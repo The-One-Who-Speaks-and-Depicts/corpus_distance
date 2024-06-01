@@ -7,7 +7,6 @@ further integration into the pipeline
 
 from tqdm import tqdm
 import Levenshtein
-from corpus_distance.cdutils import delete_outliers
 
 def soerensen_dice(lect1: int, lect2: int, common: int) -> float:
     """
@@ -78,9 +77,6 @@ def dist_rank(coinciding_n_grams_number: int,
                 list_of_ranks.append(abs(i[1] - j[1]))
                 # add information
                 n_grams_for_analysis[i[0]] = abs(i[1] - j[1])
-    # I also perform normalisation to exclude outliers that may negatively
-    # infuence quality of the metrics
-    list_of_ranks = delete_outliers(list_of_ranks)
     # yielding all the scores, and mean normalised DistRank score
     mean_of_ranks = sum(list_of_ranks)/len(list_of_ranks)
     # if Soerensen normalisation utilised, change result accordingly

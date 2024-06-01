@@ -131,7 +131,7 @@ class Lect:
 
 
 def create_vectors_for_lects(df: DataFrame,
-                            fasttext_params: FastTextParams
+                            fasttext_params: FastTextParams = FastTextParams()
                             ) -> list[Lect]:
     """
     Creates a list of dictionaries, where each dictionary

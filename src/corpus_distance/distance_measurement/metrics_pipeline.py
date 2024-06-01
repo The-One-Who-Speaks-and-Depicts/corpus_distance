@@ -11,7 +11,6 @@ from corpus_distance.distance_measurement.analysis import save_data_for_analysis
 from corpus_distance.distance_measurement.hybridisation\
     import compare_lects_with_vectors, HybridisationParameters, LectPairInformation
 from corpus_distance.cdutils import get_unique_pairs, get_lects_from_dataframe
-logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 
 def score_metrics_for_corpus_dataset(
@@ -19,7 +18,7 @@ def score_metrics_for_corpus_dataset(
     store_path: str = dirname(realpath(__file__)),
     metrics_name: str = "hybrid measurement",
     hybridisation_parameters: HybridisationParameters = HybridisationParameters(),
-    ) -> list[int|float]:
+    ) -> list[tuple[tuple[str,str], int|float]]:
     """
     A function that takes dataset, metrics name and parameters for hybridisation,
     and returns a list of results for each pair of lects in a consecutive order
@@ -30,10 +29,10 @@ def score_metrics_for_corpus_dataset(
         hybridisation_parameters(HybridisationParameters): a set of parameters
         for hybridisation
     Returns:
-        overall_results(list[int|float]): a list of measurements for each
-        pair of lects in a consecutive order
+        overall_results(list[tuple[tuple[str,str], int|float]]): a list of measurements for each
+        pair of lects in a consecutive order with pair names
     """
-    if not df:
+    if df is None:
         raise ValueError("No df provided")
     if not isdir(store_path):
         raise ValueError(f'Path {store_path} does not exist')
@@ -55,9 +54,8 @@ def score_metrics_for_corpus_dataset(
 
         lects_for_analysis = LectPairInformation(
             lect_1, lect_2,
-            lect_info_1,
-            lect_info_2,
-            lect_vectors_1, lect_vectors_2)
+            lect_vectors_1, lect_vectors_2,
+            lect_info_1, lect_info_2)
 
         # run metric and save the final results
         analysis_data, result = compare_lects_with_vectors(
@@ -67,5 +65,6 @@ def score_metrics_for_corpus_dataset(
         logging.info("Storing results in %s", store_path)
         save_data_for_analysis(analysis_data, metrics_name, i[0], i[1], store_path)
         logging.info("%s for %s and %s is %s", metrics_name, i[0], i[1], result)
-        overall_results.append(result)
+        overall_results.append((i, result))
+    logging.info("Resulting distances are %s", overall_results)
     return overall_results
