@@ -1,0 +1,22 @@
+name: Docker
+
+on:
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Created Docker container
+        run: |
+          sudo docker run -- name my_image .
+      - name: Test Docker container
+        run: |
+          sudo docker run -i -t my_image /bin/bash
+          python3
+          from corpus_distance.pipeline import perform_clusterisation
+          perform_clusterisation()
