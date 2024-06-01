@@ -1,8 +1,8 @@
-name: Deploy test PyPI package
+name: Main post-merge
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ main ]
   
 jobs:
 
@@ -41,7 +41,7 @@ jobs:
       url: https://test.pypi.org/p/corpus_distance
 
     permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
+      id-token: write
 
     steps:
     - name: Download all the dists
