@@ -60,8 +60,9 @@ jobs:
 
   build:
     name: Build distribution 📦
-    needs: 
-      - tests
+    needs:
+      - pylint 
+      - coverage
     runs-on: ubuntu-latest
 
     steps:
