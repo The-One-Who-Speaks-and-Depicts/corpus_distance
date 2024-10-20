@@ -7,6 +7,7 @@ from os.path import dirname, isdir, join, realpath
 import matplotlib
 import matplotlib.pyplot as plt
 from Bio import Phylo
+import re
 from Bio.Phylo.TreeConstruction import _DistanceMatrix
 
 def create_distance_matrix(
@@ -56,8 +57,10 @@ def detect_outgroup(tree: Phylo.BaseTree.Tree, outgroup: str, data_name: str,
     is_outgroup_correct = 'CORRECT'\
         if outgroup in [tree.clade.clades[0].name, tree.clade.clades[1].name]\
         else 'INCORRECT'
-    outgroup_clade = 0 if tree.clade.clades[0].is_terminal() else 1
-    ingroup_clade = 1 if tree.clade.clades[0].is_terminal() else 0
+    outgroup_clade = 1 if re.search(r'Inner\d{1,}', tree.clade.clades[0].name) else 0
+    ingroup_clade = 0 if re.search(r'Inner\d{1,}', tree.clade.clades[0].name) else 1
+    if tree.clade.clades[outgroup_clade].branch_length == tree.clade.clades[ingroup_clade].branch_length:
+        raise ValueError("WRONG!")
     with open(join(store_path, metrics + ".info"), 'w', encoding='utf-8') as out:
         out.write(f"{data_name}\t{is_outgroup_correct}\t\
                   {tree.clade.clades[outgroup_clade].branch_length}\t\
