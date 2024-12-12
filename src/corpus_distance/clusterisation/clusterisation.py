@@ -3,7 +3,6 @@ Clusterisation module contains algorithms that perform actual
 split of lects into groups,
 based on the results of distance measurements, conducted earlier.
 """
-import logging
 from os.path import isdir, dirname, realpath
 from dataclasses import dataclass, field
 from typing import Callable
@@ -68,13 +67,10 @@ def clusterise_lects_from_distance_matrix(
     """
     if not isdir(clusterisation_parameters.store_path):
         raise ValueError("Directory does not exist")
-    logging.info('Distances are %s', pairwise_distances)
     distance_matrix = utils.create_distance_matrix(pairwise_distances,
                                                    clusterisation_parameters.lects)
-    logging.info('Distance matrix is %s', distance_matrix)
     tree = get_tree(distance_matrix,
                     clusterisation_parameters.classification_method)
-    logging.info('Tree is %s', tree)
     utils.detect_outgroup(tree,
                           clusterisation_parameters.outgroup,
                           clusterisation_parameters.data_name,

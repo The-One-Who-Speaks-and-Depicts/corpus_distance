@@ -4,10 +4,11 @@ the whole package and should be accessible from
 each part of the code; collected here to avoid
 duplicating.
 """
+from copy import deepcopy
 
-import logging
 from pandas import DataFrame
 from numpy import percentile
+from tqdm import tqdm
 
 def clear_stop_words(text: str, stop_words: list[str]) -> str:
     """
@@ -85,7 +86,6 @@ def delete_outliers(original_distribution: list[int|float]
             if not lower_boundary <= i <= upper_boundary
         ]
     if len(normalised_distribution) < 1:
-        logging.warning("Original distribution is not a normal distribution")
         return original_distribution
     return normalised_distribution
 
@@ -103,9 +103,11 @@ def get_unique_pairs(lects: list[str]) -> list[tuple[str, str]]:
     if not lects:
         raise ValueError("Empty lect list")
     unique_pairs = []
-    for i in set(lects):
-        for j in set(lects):
-            if (i != j) and (i, j) not in unique_pairs and (j, i) not in unique_pairs:
+    lects = set(lects)
+    lects_to_check = deepcopy(lects)
+    for i in tqdm(lects):
+        for j in lects_to_check:
+            if i != j:
                 unique_pairs.append((i, j))
-    logging.info("Unique pairs: %s", ";".join([i[0] + i[1] for i in unique_pairs]))
+        lects_to_check = [k for k in lects_to_check if k != i]
     return unique_pairs

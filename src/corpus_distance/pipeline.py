@@ -7,7 +7,6 @@ import importlib
 import json
 from os import mkdir
 from os.path import isdir, dirname, realpath
-import logging
 from Bio.Phylo.TreeConstruction import DistanceTreeConstructor
 from corpus_distance.cdutils import get_lects_from_dataframe
 from corpus_distance.data_preprocessing.data_pipeline import assemble_dataset
@@ -83,9 +82,7 @@ def set_storage_directory(store_path: str) -> str:
     """
     if (store_path and store_path != "default"):
         if not isdir(store_path):
-            logging.info("Directory %s not exists, creating directory", store_path)
             mkdir(store_path)
-        logging.info("Directory set to %s", store_path)
         return store_path
     return dirname(realpath(__file__))
 
@@ -311,8 +308,6 @@ def perform_clusterisation(config_path: str = 'default') -> None:
     else:
         with open(config_path, 'r', encoding='utf-8') as inp:
             cfg = set_configuration(json.load(inp))
-    logging.info('Configuration set')
-    logging.info("Reading data")
     data = assemble_dataset() if cfg.data_params.content_path == 'default' else assemble_dataset(
         cfg.data_params.content_path,
         cfg.data_params.split,
@@ -320,7 +315,6 @@ def perform_clusterisation(config_path: str = 'default') -> None:
         cfg.data_params.topic_modelling,
         cfg.data_params.fasttext_params
         )
-    logging.info("Scoring distances")
     distances = score_metrics_for_corpus_dataset(
         data,
         cfg.store_path,
@@ -328,9 +322,7 @@ def perform_clusterisation(config_path: str = 'default') -> None:
         cfg.hybridisation_parameters
         )
     cfg.clusterisation_parameters.lects = get_lects_from_dataframe(data)
-    logging.info("Initialising clusterisation")
     clusterise_lects_from_distance_matrix(
         distances,
         cfg.clusterisation_parameters
         )
-    logging.info("Clusterisation performed")
