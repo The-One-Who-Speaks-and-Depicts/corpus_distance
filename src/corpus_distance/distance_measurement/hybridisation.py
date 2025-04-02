@@ -144,7 +144,7 @@ def hybrid(lects_information: LectPairInformation,
         not lects_information.lect_a_n_grams\
         or not lects_information.lect_b_n_grams
         ):
-        raise ValueError("There is no information on frequencies")
+        return ([], 1, {})
     if (
         not lects_information.lect_a_vectors\
         or not lects_information.lect_b_vectors
@@ -160,12 +160,12 @@ def hybrid(lects_information: LectPairInformation,
                                     metrics,
                                     alphabet_normalisation)
     flipped_lect = LectPairInformation(
-       lect_a_n_grams=lects_information.lect_b_n_grams,
-       lect_b_n_grams=lects_information.lect_a_n_grams,
-       lect_a_vectors=lects_information.lect_b_vectors,
-       lect_b_vectors=lects_information.lect_a_vectors,
-       lect_a_info=lects_information.lect_b_info,
-       lect_b_info=lects_information.lect_a_info
+        lect_a_n_grams=lects_information.lect_b_n_grams,
+        lect_b_n_grams=lects_information.lect_a_n_grams,
+        lect_a_vectors=lects_information.lect_b_vectors,
+        lect_b_vectors=lects_information.lect_a_vectors,
+        lect_a_info=lects_information.lect_b_info,
+        lect_b_info=lects_information.lect_a_info
     )
     diffs_b = hybrid_for_single_lect(flipped_lect,
                                     metrics,
