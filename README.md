@@ -6,9 +6,9 @@
 
 # What is it?
 
-corpus_distance is a Python package that allows to measure distance between the lects that are presented only by small (down to extremely small, <1000 tokens) raw (without any kind of morhological tagging, lemmatisation, or dependency parsing) corpora, and classify them. It joins frequency-based metrics and string similarity measurements into a hybrid distance scorer.
+`corpus_distance` is a Python package that allows to measure distance between the lects that are presented only by small (down to extremely small, <1000 tokens) raw (without any kind of morhological tagging, lemmatisation, or dependency parsing) corpora, and classify them. It joins frequency-based metrics and string similarity measurements into a hybrid distance scorer.
 
-corpus_distance operates with 3-shingles, a sequences of 3 symbols, by which words are split. This helps to spot more intricate patterns and correspondences within raw data, as well as to enhance the dataset size.
+`corpus_distance` operates with *3-shingles*, a sequences of 3 symbols, by which words are split `(Zelenkov and Segalovich, 2007)`. This helps to spot more intricate patterns and correspondences within raw data, as well as to enhance the dataset size.
 
 ## NB!
 
@@ -16,7 +16,7 @@ The classification is going to be only (and extremely) preliminary, as it is by 
 
 In addition, the results may not be used as a proof of language relationship (external classification), only as a supporting evidence for a tree topology (internal classification), as it is with any kind of phylogenetic methods in historical comparative studies.
 
-One more important notion is that one should be very careful with using this package for a distantly related lects. As it is with any kind of language-agnostic methods, it loses precision with the increase of distance between analysed groups (Holman et al., 2008). 
+One more important notion is that one should be very careful with using this package for a distantly related lects. As it is with any kind of language-agnostic methods, it loses precision with the increase of distance between analysed groups `(Holman et al., 2008)`. 
 
 # How to install
 
@@ -66,12 +66,13 @@ sudo docker run -i -t IMAGE_NAME /bin/bash
    - EXTENSION is preferrably .txt, as package works with files with raw text data;
    - LECT is a name of the lect (idiolect, dialect, sociolect, regiolect, standard, etc.; any given variety of the language, such as English, or Polish, or Khislavichi, or Napoleon's French) that is the object of the classification
    - TEXT is a unique identifier of the text within a given lect (for instance, NapoleonSpeech1, or John_Gospel)
-5. Set up a configuration .json file (the example is in the repository). The parameters are:
+5. Set up a configuration `.json` file (the example is in the repository). The parameters are:
+   -  `metrics_name`: a user-defined name of the metrics
    -  `store_path`: a path to the folder for results storage
    -  `content_path`: a path to the data folder
    -  `split`: a share of tokens from your files that would be taken into consideration (useful for exploring size effects)
-   -  `lda_params`: a set of parameters for a Latent Dirichlet Association model from `gensim` package
-   -  `topic_modelling`: model may delete topic words, if this flag has value `true`, or not, if value is `false`. This heuristic helps to exclude the words that define the text, on the contrary to the ones that define the language
+   -  `topic_modelling`: model may delete topic words, if this flag has value `substitute`, or not, if value is `not_substitute`. This heuristic helps to exclude the words that define the text, on the contrary to the ones that define the language. Alternatively, if the value is `topic_words_only`, the model will delete all non-topic words.
+   -  `lda_params`: a set of parameters for a Latent Dirichlet Association model from `gensim` package and two custom parameters, `required_topics_start` and `required_topics_num`, used to regulate, the tokens from which topics the model will utilise further. `required_topics_start` is the first topic (defaults to `0`), `required_topics_num` is the number of topics after `required_topics_start` that model will collect (defaults to `10`).
    -  `fasttext_params`: a set of parameters for a FastText model that provides the classifier with the symbol embeddings
    -  `soerensen`: normalisation of frequency-based metrics by the Soerensen-Dice coefficient
    -  `hybridisation`: flag for use (or not use) of string similarity measure for non-coinciding 3-shingles
@@ -86,18 +87,22 @@ sudo docker run -i -t IMAGE_NAME /bin/bash
 6. The example of the `config.json`:
 ```
     {
-        "store_path": "default",
         "metrics_name": "default_metrics_name",
         "data": {
-            "content_path": "default",
-            "split": 1,
+            "dataset_params": {
+                "store_path": "default",
+                "split": 1,
+                "content_path": "default",
+                "topic_modelling": "not_substitute"
+            },
             "lda_params": {
                 "num_topics": 10,
                 "alpha": "auto",
                 "epochs": 300,
-                "passes": 500
+                "passes": 500,
+                "required_topics_start": 0,
+                "required_topics_num": 10
             },
-            "topic_modelling": false,
             "fasttext_params": {
                 "vector_size": 128,
                 "window": 15,

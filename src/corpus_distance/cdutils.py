@@ -23,6 +23,22 @@ def clear_stop_words(text: str, stop_words: list[str]) -> str:
     """
     return ' '.join([i for i in text.split(' ') if i not in stop_words])
 
+
+def return_topic_words(text: str, topic_words: list[str]) -> str:
+    """
+    Takes the text and returns only topic words from it,
+    separated by a single space
+    
+    Arguments:
+    text(str): an original text as a single string
+    topic_words(list[str]): a list of strings, each being a topic word
+
+    Returns:
+    text(str): a text, containing only topic words    
+    """
+    return ' '.join([i for i in text.split(' ') if i in topic_words])
+
+
 def get_lects_from_dataframe(df: DataFrame) -> list[str]:
     """
     Takes the dataframe with column "lect" 
