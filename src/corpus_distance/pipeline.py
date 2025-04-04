@@ -75,7 +75,7 @@ def set_dataset_params(dataset_cfg: dict) -> DatasetPreprocessingParams:
     """
     dataset_params = DatasetPreprocessingParams()
     if dataset_cfg["store_path"] and isinstance(dataset_cfg["store_path"], str):
-        dataset_params["store_path"] =\
+        dataset_params.store_path =\
             create_and_set_storage_directory(dataset_cfg["store_path"])
     if (dataset_cfg["content_path"] and dataset_cfg["content_path"] != "default"):
         dataset_params.content_path = dataset_cfg["content_path"]
@@ -221,9 +221,9 @@ def set_metrics_name(
     metrics_name = ""
     if cfg["clusterisation_parameters"]["data_name"]:
         metrics_name += f'{cfg["clusterisation_parameters"]["data_name"]}-'
-    if cfg["data"]["split"]:
-        metrics_name += f'{str(cfg["data"]["split"])}-'
-    metrics_name += f'{str(cfg["data"]["topic_modelling"])}-'
+    if cfg["data"]["dataset_params"]["split"]:
+        metrics_name += f'{str(cfg["data"]["dataset_params"]["split"])}-'
+    metrics_name += f'{str(cfg["data"]["dataset_params"]["topic_modelling"])}-'
     metrics_name += "DistRank-"
     metrics_name += str(hybridisation_parameters)
     return metrics_name
