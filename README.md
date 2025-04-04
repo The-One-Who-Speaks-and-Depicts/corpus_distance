@@ -124,8 +124,7 @@ sudo docker run -i -t IMAGE_NAME /bin/bash
             "data_name": "Modern Standard Slavic",
             "outgroup": "Slovak",
             "metrics": "default_metrics_name",
-            "classification_method": "upgma",
-            "store_path": "default"
+            "classification_method": "upgma"
         }
     }
 ```
