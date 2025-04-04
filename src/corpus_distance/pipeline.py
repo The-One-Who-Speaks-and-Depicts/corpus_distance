@@ -6,10 +6,11 @@ from dataclasses import dataclass
 import importlib
 import json
 from os import mkdir
-from os.path import isdir, dirname, realpath
+from os.path import isdir, dirname, exists, realpath
 from Bio.Phylo.TreeConstruction import DistanceTreeConstructor
 from corpus_distance.cdutils import get_lects_from_dataframe
-from corpus_distance.data_preprocessing.data_pipeline import assemble_dataset
+from corpus_distance.data_preprocessing.data_pipeline\
+    import assemble_dataset, DataParameters, DatasetPreprocessingParams
 from corpus_distance.data_preprocessing.topic_modelling import LDAParams
 from corpus_distance.data_preprocessing.vectorisation import FastTextParams
 from corpus_distance.distance_measurement.hybridisation import HybridisationParameters
@@ -17,34 +18,6 @@ from corpus_distance.clusterisation.clusterisation import ClusterisationParamete
 from corpus_distance.distance_measurement.metrics_pipeline import score_metrics_for_corpus_dataset
 from corpus_distance.clusterisation.clusterisation import clusterise_lects_from_distance_matrix
 from corpus_distance.data.data_resources import config
-
-
-@dataclass
-class DataParameters:
-    """
-    Class with parameters that define data loading and preprocessing
-    part of pipeline
-
-    Parameters:
-        content_path(str): path to directory with text files; text files should be
-        named as "TEXT.LECT.txt", and consist of tokenised texts, transformed into
-        a single string
-        split(int|float): a number from 0 to 1, which signals, which percentage of
-        source data should form the basis for clusterisation
-        lda_params(LDAParams): a set of parameters for latent dirichlet association
-        model of gensim package, for details see LDAParams documentation
-        topic_modelling(bool): flag that describes the choice of user to change original text
-        to text without topic words
-        fasttext_params(FastTextParams): a set of parameters for FastText model that
-        builds symbol vectors, for details see FastText documentation
-    """
-    content_path: str = "default"
-    split: int | float = 1
-    lda_params: LDAParams = LDAParams()
-    topic_modelling: bool = False
-    fasttext_params: FastTextParams = FastTextParams()
-
-
 
 @dataclass
 class ConfigurationParameters:
@@ -61,16 +34,14 @@ class ConfigurationParameters:
         clusterisation_parameters(ClusterisationParameters): settings for 
         clusterisation, for details see ClusterisationParameters documentation
     """
-
-    store_path: str = "default"
+    metrics_name: str = "default_metrics_name"
     data_params: DataParameters = DataParameters()
     hybridisation_parameters: HybridisationParameters = HybridisationParameters()
-    metrics_name: str = "default_metrics_name"
     clusterisation_parameters: ClusterisationParameters = ClusterisationParameters()
 
 
 
-def set_storage_directory(store_path: str) -> str:
+def create_and_set_storage_directory(store_path: str) -> str:
     """
     Sets directory for experiment results, in case of its absence,
     creates it
@@ -80,11 +51,39 @@ def set_storage_directory(store_path: str) -> str:
     Returns:
         store_path(str): final path to directory, where a program will put the results
     """
-    if (store_path and store_path != "default"):
-        if not isdir(store_path):
-            mkdir(store_path)
+    if not store_path or not isinstance(store_path, str):
+        raise ValueError("Storage directory name is not a non-empty string")
+    if store_path and not isdir(store_path) and not exists(store_path):
+        mkdir(store_path)
         return store_path
     return dirname(realpath(__file__))
+
+
+def set_dataset_params(dataset_cfg: dict) -> DatasetPreprocessingParams:
+    """
+    Creates a default DatasetPreprocessingParams object for preprocessing
+    of the dataset and alters it, if user provides any kind of 
+    alternative parameters.
+
+    Parameters: 
+        dataset_cfg(dict): user-provided parameters for 
+        dataset preprocessing
+
+    Returns:
+        dataset_params(DatasetPreprocessingParams): full set of parameters
+        for dataset preprocessing heuristics
+    """
+    dataset_params = DatasetPreprocessingParams()
+    if dataset_cfg["store_path"] and isinstance(dataset_cfg["store_path"], str):
+        dataset_params["store_path"] =\
+            create_and_set_storage_directory(dataset_cfg["store_path"])
+    if (dataset_cfg["content_path"] and dataset_cfg["content_path"] != "default"):
+        dataset_params.content_path = dataset_cfg["content_path"]
+    if dataset_cfg["split"]:
+        dataset_params.split = dataset_cfg["split"]
+    if dataset_cfg["topic_modelling"]:
+        dataset_params.topic_modelling = dataset_cfg["topic_modelling"]
+    return dataset_params
 
 
 
@@ -109,6 +108,10 @@ def set_lda_params(lda_cfg: dict) -> LDAParams:
         lda_params.epochs = lda_cfg["epochs"]
     if lda_cfg["passes"]:
         lda_params.passes = lda_cfg["passes"]
+    if lda_cfg["required_topics_num"]:
+        lda_params.required_topics_num = lda_cfg["required_topics_num"]
+    if lda_cfg["required_topics_start"]:
+        lda_params.required_topics_start = lda_cfg["required_topics_start"]
     return lda_params
 
 
@@ -157,14 +160,10 @@ def set_data_configuration(data_cfg: dict) -> DataParameters:
         data_params(DataParameters): full set of DataParameters for the model to train on
     """
     data_params = DataParameters()
-    if (data_cfg["content_path"] and data_cfg["content_path"] != "default"):
-        data_params.content_path = data_cfg["content_path"]
-    if data_cfg["split"]:
-        data_params.split = data_cfg["split"]
+    if data_cfg["dataset_params"]:
+        data_params.dataset_params = set_dataset_params(data_cfg["dataset_params"])
     if data_cfg["lda_params"]:
         data_params.lda_params = set_lda_params(data_cfg["lda_params"])
-    if "topic_modelling" in data_cfg.keys():
-        data_params.topic_modelling = data_cfg["topic_modelling"]
     if data_cfg["fasttext_params"]:
         data_params.fasttext_params = set_fast_text_params(data_cfg["fasttext_params"])
     return data_params
@@ -278,7 +277,6 @@ def set_configuration(cfg: dict) -> ConfigurationParameters:
         joining user input with default parameters, if necessary
     """
     cfg_params = ConfigurationParameters()
-    cfg_params.store_path = set_storage_directory(cfg["store_path"])
     if cfg["data"]:
         cfg_params.data_params = set_data_configuration(cfg["data"])
     if cfg["hybridisation_parameters"]:
@@ -290,7 +288,7 @@ def set_configuration(cfg: dict) -> ConfigurationParameters:
             set_clusterisation_parameters(
                 cfg["clusterisation_parameters"],
                 cfg_params.metrics_name,
-                cfg_params.store_path
+                cfg_params.data_params.dataset_params.store_path
                 )
     return cfg_params
 
@@ -308,16 +306,10 @@ def perform_clusterisation(config_path: str = 'default') -> None:
     else:
         with open(config_path, 'r', encoding='utf-8') as inp:
             cfg = set_configuration(json.load(inp))
-    data = assemble_dataset() if cfg.data_params.content_path == 'default' else assemble_dataset(
-        cfg.data_params.content_path,
-        cfg.data_params.split,
-        cfg.data_params.lda_params,
-        cfg.data_params.topic_modelling,
-        cfg.data_params.fasttext_params
-        )
+    data = assemble_dataset(cfg.data_params)
     distances = score_metrics_for_corpus_dataset(
         data,
-        cfg.store_path,
+        cfg.data_params.dataset_params.store_path,
         cfg.metrics_name,
         cfg.hybridisation_parameters
         )
