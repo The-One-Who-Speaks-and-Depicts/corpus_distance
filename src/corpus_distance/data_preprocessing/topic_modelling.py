@@ -69,8 +69,7 @@ def get_topic_words_for_lects(
     if params.num_topics < 1 or params.epochs < 1 \
         or params.passes < 1:
         raise ValueError(
-            "Num_topics, epochs and passes should be positive integers required_topics_start and \
-            required_topics_num should be positive integers"
+            "Num_topics, epochs and passes should be positive integers"
             )
     if params.required_topics_num and (
         params.required_topics_num < 0 or \
