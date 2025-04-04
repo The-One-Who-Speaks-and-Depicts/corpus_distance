@@ -160,7 +160,7 @@ def set_data_configuration(data_cfg: dict) -> DataParameters:
         data_params(DataParameters): full set of DataParameters for the model to train on
     """
     data_params = DataParameters()
-    if data_cfg["data_params"]:
+    if data_cfg["dataset_params"]:
         data_params.dataset_params = set_dataset_params(data_cfg["dataset_params"])
     if data_cfg["lda_params"]:
         data_params.lda_params = set_lda_params(data_cfg["lda_params"])
