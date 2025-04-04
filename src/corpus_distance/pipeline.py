@@ -10,7 +10,7 @@ from os.path import isdir, dirname, exists, realpath
 from Bio.Phylo.TreeConstruction import DistanceTreeConstructor
 from corpus_distance.cdutils import get_lects_from_dataframe
 from corpus_distance.data_preprocessing.data_pipeline\
-    import assemble_dataset, DataParameters, DatasetParameters
+    import assemble_dataset, DataParameters, DatasetPreprocessingParams
 from corpus_distance.data_preprocessing.topic_modelling import LDAParams
 from corpus_distance.data_preprocessing.vectorisation import FastTextParams
 from corpus_distance.distance_measurement.hybridisation import HybridisationParameters
@@ -59,9 +59,9 @@ def create_and_set_storage_directory(store_path: str) -> str:
     return dirname(realpath(__file__))
 
 
-def set_dataset_params(dataset_cfg: dict) -> DatasetParameters:
+def set_dataset_params(dataset_cfg: dict) -> DatasetPreprocessingParams:
     """
-    Creates a default DatasetParameters object for preprocessing
+    Creates a default DatasetPreprocessingParams object for preprocessing
     of the dataset and alters it, if user provides any kind of 
     alternative parameters.
 
@@ -70,10 +70,10 @@ def set_dataset_params(dataset_cfg: dict) -> DatasetParameters:
         dataset preprocessing
 
     Returns:
-        dataset_params(DatasetParameters): full set of parameters
+        dataset_params(DatasetPreprocessingParams): full set of parameters
         for dataset preprocessing heuristics
     """
-    dataset_params = DatasetParameters()
+    dataset_params = DatasetPreprocessingParams()
     if dataset_cfg["store_path"] and isinstance(dataset_cfg["store_path"], str):
         dataset_params["store_path"] =\
             create_and_set_storage_directory(dataset_cfg["store_path"])

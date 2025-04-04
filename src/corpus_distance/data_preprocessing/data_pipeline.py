@@ -14,7 +14,7 @@ import corpus_distance.data_preprocessing.topic_modelling as tm
 import corpus_distance.data_preprocessing.frequency_scoring as freqscore
 
 @dataclass
-class DatasetParameters:
+class DatasetPreprocessingParams:
     """
     Class with parameters that define the transformations the dataset
     undergoes during the preprocessing stage.
@@ -41,14 +41,14 @@ class DataParameters:
     part of pipeline
 
     Parameters:
-        dataset_params(DatasetParams): a set of parameters for dataset preprocessing,
-        for details see DatasetParameters documentation
+        dataset_params(DatasetPreprocessingParams): a set of parameters for dataset preprocessing,
+        for details see DatasetPreprocessingParams documentation
         lda_params(LDAParams): a set of parameters for latent dirichlet association
         model of gensim package, for details see LDAParams documentation
         fasttext_params(FastTextParams): a set of parameters for FastText model that
         builds symbol vectors, for details see FastText documentation
     """
-    dataset_params: DatasetParameters = DatasetParameters()
+    dataset_params: DatasetPreprocessingParams = DatasetPreprocessingParams()
     lda_params: tm.LDAParams = tm.LDAParams()
     fasttext_params: vec.FastTextParams = vec.FastTextParams()
 
