@@ -42,6 +42,8 @@ def score_metrics_for_corpus_dataset(
     # calculate distances for each pair of lects
     overall_results = []
     for i in get_unique_pairs(get_lects_from_dataframe(df)):
+        logger.info("Starting scoring %s for %s and %s",
+            metrics_name, i[0], i[1])
         # getting required data for each lect from the dataframe
         lect_1 = list(df[df['lect'] == i[0]]['relative_frequency_n_grams'])[0]
         lect_2 = list(df[df['lect'] == i[1]]['relative_frequency_n_grams'])[0]
