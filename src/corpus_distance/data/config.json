@@ -1,16 +1,20 @@
 {
-    "store_path": "default",
     "metrics_name": "default_metrics_name",
     "data": {
-        "content_path": "default",
-        "split": 1,
+        "dataset_params": {
+            "store_path": "default",
+            "split": 1,
+            "content_path": "default",
+            "topic_modelling": "not_substitute"
+        },
         "lda_params": {
             "num_topics": 10,
             "alpha": "auto",
             "epochs": 300,
-            "passes": 500
+            "passes": 500,
+            "required_topics_start": 0,
+            "required_topics_num": 10
         },
-        "topic_modelling": false,
         "fasttext_params": {
             "vector_size": 128,
             "window": 15,
@@ -32,7 +36,6 @@
         "data_name": "Modern Standard Slavic",
         "outgroup": "Slovak",
         "metrics": "default_metrics_name",
-        "classification_method": "upgma",
-        "store_path": "default"
+        "classification_method": "upgma"
     }
 }

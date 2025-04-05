@@ -4,10 +4,15 @@ the whole package and should be accessible from
 each part of the code; collected here to avoid
 duplicating.
 """
+from copy import deepcopy
+from logging import getLogger, NullHandler
 
-import logging
 from pandas import DataFrame
 from numpy import percentile
+from tqdm import tqdm
+
+logger = getLogger(__name__)
+logger.addHandler(NullHandler)
 
 def clear_stop_words(text: str, stop_words: list[str]) -> str:
     """
@@ -21,6 +26,22 @@ def clear_stop_words(text: str, stop_words: list[str]) -> str:
     text(str): a text, cleared from stopwords
     """
     return ' '.join([i for i in text.split(' ') if i not in stop_words])
+
+
+def return_topic_words(text: str, topic_words: list[str]) -> str:
+    """
+    Takes the text and returns only topic words from it,
+    separated by a single space
+    
+    Arguments:
+    text(str): an original text as a single string
+    topic_words(list[str]): a list of strings, each being a topic word
+
+    Returns:
+    text(str): a text, containing only topic words    
+    """
+    return ' '.join([i for i in text.split(' ') if i in topic_words])
+
 
 def get_lects_from_dataframe(df: DataFrame) -> list[str]:
     """
@@ -85,7 +106,7 @@ def delete_outliers(original_distribution: list[int|float]
             if not lower_boundary <= i <= upper_boundary
         ]
     if len(normalised_distribution) < 1:
-        logging.warning("Original distribution is not a normal distribution")
+        logger.warning("Original distribution is not a normal distribution")
         return original_distribution
     return normalised_distribution
 
@@ -103,9 +124,12 @@ def get_unique_pairs(lects: list[str]) -> list[tuple[str, str]]:
     if not lects:
         raise ValueError("Empty lect list")
     unique_pairs = []
-    for i in set(lects):
-        for j in set(lects):
-            if (i != j) and (i, j) not in unique_pairs and (j, i) not in unique_pairs:
+    lects = set(lects)
+    lects_to_check = deepcopy(lects)
+    for i in tqdm(lects):
+        for j in lects_to_check:
+            if i != j:
                 unique_pairs.append((i, j))
-    logging.info("Unique pairs: %s", ";".join([i[0] + i[1] for i in unique_pairs]))
+        lects_to_check = [k for k in lects_to_check if k != i]
+    logger.info("Unique pairs: %s", ";".join([i[0] + i[1] for i in unique_pairs]))
     return unique_pairs
