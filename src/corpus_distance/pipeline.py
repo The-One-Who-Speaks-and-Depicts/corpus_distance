@@ -5,6 +5,7 @@ distance measurement and clusterisation of lects
 from dataclasses import dataclass
 import importlib
 import json
+from logging import getLogger, NullHandler
 from os import mkdir
 from os.path import isdir, dirname, exists, realpath
 from Bio.Phylo.TreeConstruction import DistanceTreeConstructor
@@ -18,6 +19,9 @@ from corpus_distance.clusterisation.clusterisation import ClusterisationParamete
 from corpus_distance.distance_measurement.metrics_pipeline import score_metrics_for_corpus_dataset
 from corpus_distance.clusterisation.clusterisation import clusterise_lects_from_distance_matrix
 from corpus_distance.data.data_resources import config
+
+logger = getLogger(__name__)
+logger.addHandler(NullHandler())
 
 @dataclass
 class ConfigurationParameters:
@@ -55,6 +59,7 @@ def create_and_set_storage_directory(store_path: str) -> str:
         raise ValueError("Storage directory name is not a non-empty string")
     if store_path and not isdir(store_path) and not exists(store_path):
         mkdir(store_path)
+        logger.info("Directory set to %s", store_path)
         return store_path
     return dirname(realpath(__file__))
 
@@ -306,15 +311,19 @@ def perform_clusterisation(config_path: str = 'default') -> None:
     else:
         with open(config_path, 'r', encoding='utf-8') as inp:
             cfg = set_configuration(json.load(inp))
+    logger.debug('Configuration set')
     data = assemble_dataset(cfg.data_params)
+    logger.debug('Dataset assembled')
     distances = score_metrics_for_corpus_dataset(
         data,
         cfg.data_params.dataset_params.store_path,
         cfg.metrics_name,
         cfg.hybridisation_parameters
         )
+    logger.debug('Metrics scored')
     cfg.clusterisation_parameters.lects = get_lects_from_dataframe(data)
     clusterise_lects_from_distance_matrix(
         distances,
         cfg.clusterisation_parameters
         )
+    logger.debug('Clusterisation finished')

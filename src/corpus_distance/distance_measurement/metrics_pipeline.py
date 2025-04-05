@@ -5,12 +5,15 @@ texts in the dataset
 """
 
 from os.path import dirname, isdir, realpath
+from logging import getLogger, NullHandler
 from pandas import DataFrame
 from corpus_distance.distance_measurement.analysis import save_data_for_analysis
 from corpus_distance.distance_measurement.hybridisation\
     import compare_lects_with_vectors, HybridisationParameters, LectPairInformation
 from corpus_distance.cdutils import get_unique_pairs, get_lects_from_dataframe
 
+logger = getLogger(__name__)
+logger.addHandler(NullHandler())
 
 def score_metrics_for_corpus_dataset(
     df: DataFrame,
@@ -59,6 +62,9 @@ def score_metrics_for_corpus_dataset(
             lects_for_analysis,
             hybridisation_parameters
         )
+        logger.info("Storing results in %s", store_path)
         save_data_for_analysis(analysis_data, metrics_name, i[0], i[1], store_path)
+        logger.info("%s for %s and %s is %s", metrics_name, i[0], i[1], result)
         overall_results.append((i, result))
+    logger.info("Resulting distances are %s", overall_results)
     return overall_results

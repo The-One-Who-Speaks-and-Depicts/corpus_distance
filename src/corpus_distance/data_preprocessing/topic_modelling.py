@@ -6,7 +6,7 @@ documents or document genres.
 
 from copy import deepcopy
 from dataclasses import dataclass
-from logging import getLogger, NullHandler, INFO
+from logging import getLogger, NullHandler
 from os.path import exists, join
 
 from pandas import DataFrame
@@ -16,7 +16,6 @@ from gensim.models import LdaModel
 from corpus_distance.cdutils import clear_stop_words, return_topic_words
 
 logger = getLogger(__name__)
-logger.setLevel(INFO)
 logger.addHandler(NullHandler())
 
 @dataclass
@@ -92,7 +91,7 @@ def get_topic_words_for_lects(
     topic_words = {}
     logger.debug("Input checks passed. Topic modelling started.")
     for lect in lects:
-        logger.debug("Building topics for %s lect", lect)
+        logger.info("Building topics for %s lect", lect)
         list_of_texts_split = [
             i.split(' ') for i in list(df[df['lect'] == lect]['text'])
             ]
@@ -114,7 +113,7 @@ def get_topic_words_for_lects(
         range_of_topics_to_collect = params.required_topics_num \
             if params.required_topics_num else params.num_topics
 
-        logger.debug(
+        logger.info(
             "Range of collected topics for %s lect is %s to %s",
                 lect,
                 str(first_topic_to_collect),
@@ -129,7 +128,7 @@ def get_topic_words_for_lects(
                 lect_topic_words.append(common_dictionary[j[0]])
 
         topic_words[lect] = list(set(lect_topic_words))
-        logger.debug(
+        logger.info(
             "Topics for %s lect are %s", lect, str(topic_words[lect])
             )
     return topic_words
@@ -156,15 +155,22 @@ def add_thematic_modelling(
     """
     if 'lect' not in df.columns or 'text' not in df.columns:
         raise ValueError("No either \'lect\' or \'text\' columns")
-    if not isinstance(topic_words, dict) or not all(
+    if not isinstance(topic_words, dict):
+        raise ValueError("Topic words should be dictionary")
+    if not all(
         isinstance(i, str) for i in topic_words.keys()
-        ) or not all(
+        ):
+        raise ValueError("The keys of topic words should be strings")
+    if not all(
             isinstance(i, list) and all(
                 isinstance(j, str) for j in i
                 ) for i in topic_words.values()
             ):
-        raise ValueError("Topic words should be a dictionary with strings \
-        as keys and lists of strings as values")
+        for i in topic_words.values():
+            print(i, isinstance(i, list))
+            for j in i:
+                print(j, isinstance(j, str))
+        raise ValueError("The values of topic words should be lists of strings")
     if not exists(output_dir):
         raise ValueError("Output directory does not exist")
     if not isinstance(substitute, str) or substitute not in [

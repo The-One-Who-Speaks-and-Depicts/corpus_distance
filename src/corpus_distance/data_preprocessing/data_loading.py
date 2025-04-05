@@ -9,12 +9,14 @@ a demo dataset of three standard Slavic Gospels (Slovak, Slovenian, Croatian)
 
 
 import os
+from logging import getLogger, NullHandler
 from itertools import islice
 from math import ceil
 from pandas import DataFrame
 import corpus_distance.data.data_resources as datares
 
-
+logger = getLogger(__name__)
+logger.addHandler(NullHandler())
 
 def load_data(content_directory: str , split: int = 1) -> DataFrame:
     """
@@ -37,8 +39,9 @@ def load_data(content_directory: str , split: int = 1) -> DataFrame:
     texts = {}
     for filename in os.listdir(content_directory):
         f = os.path.join(content_directory, filename)
-        # checking if it is a file
-        if os.path.isfile(f):
+        logger.info("Preprocessing file %s", f)
+        # checking if it is a txt file
+        if os.path.isfile(f) and f.split('.')[-1] == 'txt':
             lect = filename.split('.')[-2]
             with open(f, 'r', encoding='utf-8') as inp:
                 content = inp.read().lower().strip().split(' ')
