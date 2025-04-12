@@ -82,7 +82,7 @@ def assemble_dataset(
     lects_with_topics = tm.get_topic_words_for_lects(
         df, lects, data_params.lda_params
         )
-    df = tm.add_thematic_modelling(
+    df = tm.add_topic_modelling(
         df,
         data_params.dataset_params.store_path,
         lects_with_topics,
