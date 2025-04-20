@@ -6,8 +6,8 @@ from dataclasses import dataclass
 import importlib
 import json
 from logging import getLogger, NullHandler
-from os import mkdir
-from os.path import isdir, dirname, exists, realpath
+from os import mkdir, listdir
+from os.path import exists
 from Bio.Phylo.TreeConstruction import DistanceTreeConstructor
 from corpus_distance.cdutils import get_lects_from_dataframe
 from corpus_distance.data_preprocessing.data_pipeline\
@@ -48,7 +48,8 @@ class ConfigurationParameters:
 def create_and_set_storage_directory(store_path: str) -> str:
     """
     Sets directory for experiment results, in case of its absence,
-    creates it
+    creates it. In case the directory is not empty, throws warning in logs,
+    but stores files in the directory nonetheless.
 
     Parameters:
         store_path(str): initial path to directory, where a program will put the results
@@ -57,11 +58,15 @@ def create_and_set_storage_directory(store_path: str) -> str:
     """
     if not store_path or not isinstance(store_path, str):
         raise ValueError("Storage directory name is not a non-empty string")
-    if store_path and not isdir(store_path) and not exists(store_path):
+    if not exists(store_path):
+        logger.info("Creating directory %s", store_path)
         mkdir(store_path)
-        logger.info("Directory set to %s", store_path)
-        return store_path
-    return dirname(realpath(__file__))
+    if len(listdir(store_path)) > 0:
+        logger.warning(
+            "Storage directory %s is not empty, consider choosing the other one", store_path
+            )
+    logger.info("Storage directory set to %s", store_path)
+    return store_path
 
 
 def set_dataset_params(dataset_cfg: dict) -> DatasetPreprocessingParams:
