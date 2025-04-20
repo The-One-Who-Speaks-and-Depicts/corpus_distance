@@ -318,7 +318,8 @@ def perform_clusterisation(config_path: str = 'default') -> None:
         data,
         cfg.data_params.dataset_params.store_path,
         cfg.metrics_name,
-        cfg.hybridisation_parameters
+        cfg.hybridisation_parameters,
+        cfg.clusterisation_parameters.data_name
         )
     logger.debug('Metrics scored')
     cfg.clusterisation_parameters.lects = get_lects_from_dataframe(data)

@@ -7,7 +7,8 @@ texts in the dataset
 from os.path import dirname, isdir, realpath
 from logging import getLogger, NullHandler
 from pandas import DataFrame
-from corpus_distance.distance_measurement.analysis import save_data_for_analysis
+from corpus_distance.distance_measurement.analysis\
+    import save_data_for_analysis, save_distances_info, MeasurementInfoParams
 from corpus_distance.distance_measurement.hybridisation\
     import compare_lects_with_vectors, HybridisationParameters, LectPairInformation
 from corpus_distance.cdutils import get_unique_pairs, get_lects_from_dataframe
@@ -15,23 +16,61 @@ from corpus_distance.cdutils import get_unique_pairs, get_lects_from_dataframe
 logger = getLogger(__name__)
 logger.addHandler(NullHandler())
 
+
+def gather_lect_information_from_df(
+        df: DataFrame,
+        lect_a_name: str, lect_b_name: str) -> LectPairInformation:
+    """
+    Gets required data for each lect from the provided dataframe, using names of lects.
+
+    Arguments:
+        df (DataFrame): dataset with data
+        lect_a_name (str): name of the first lect in comparison
+        lect_b_name (str): name of the second lect in comparison
+    
+    Results:
+        A LectPairInformation class instance that contains tokens,
+        alphabet entropy and character-based embeddings for
+        each of the two lects under consideration
+    """
+    lect_a = list(df[df['lect'] == lect_a_name]['relative_frequency_n_grams'])[0]
+    lect_b = list(df[df['lect'] == lect_b_name]['relative_frequency_n_grams'])[0]
+
+    lect_info_a = list(df[df['lect'] == lect_a_name]['lect_info'])[0]
+    lect_info_b = list(df[df['lect'] == lect_b_name]['lect_info'])[0]
+
+    lect_vectors_a = list(df[df['lect'] == lect_a_name]['lect_vectors'])[0]
+    lect_vectors_b = list(df[df['lect'] == lect_b_name]['lect_vectors'])[0]
+
+    return LectPairInformation(
+        lect_a,
+        lect_b,
+        lect_info_a,
+        lect_info_b,
+        lect_vectors_a,
+        lect_vectors_b
+    )
+
+
 def score_metrics_for_corpus_dataset(
     df: DataFrame,
     store_path: str = dirname(realpath(__file__)),
     metrics_name: str = "hybrid measurement",
     hybridisation_parameters: HybridisationParameters = HybridisationParameters(),
+    dataset_name: str = "Modern Standard Slavic"
     ) -> list[tuple[tuple[str,str], int|float]]:
     """
     A function that takes dataset, metrics name and parameters for hybridisation,
     and returns a list of results for each pair of lects in a consecutive order
 
     Parameters:
-        df(DataFrame): dataset with data
-        metrics_name(str): name of metrics
+        df (DataFrame): dataset with data
+        metrics_name (str): name of metrics
         hybridisation_parameters(HybridisationParameters): a set of parameters
         for hybridisation
+        dataset_name (str): name of dataset
     Returns:
-        overall_results(list[tuple[tuple[str,str], int|float]]): a list of measurements for each
+        overall_results (list[tuple[tuple[str,str], int|float]]): a list of measurements for each
         pair of lects in a consecutive order with pair names
     """
     if df is None:
@@ -44,20 +83,8 @@ def score_metrics_for_corpus_dataset(
     for i in get_unique_pairs(get_lects_from_dataframe(df)):
         logger.info("Starting scoring %s for %s and %s",
             metrics_name, i[0], i[1])
-        # getting required data for each lect from the dataframe
-        lect_1 = list(df[df['lect'] == i[0]]['relative_frequency_n_grams'])[0]
-        lect_2 = list(df[df['lect'] == i[1]]['relative_frequency_n_grams'])[0]
 
-        lect_info_1 = list(df[df['lect'] == i[0]]['lect_info'])[0]
-        lect_info_2 = list(df[df['lect'] == i[1]]['lect_info'])[0]
-
-        lect_vectors_1 = list(df[df['lect'] == i[0]]['lect_vectors'])[0]
-        lect_vectors_2 = list(df[df['lect'] == i[1]]['lect_vectors'])[0]
-
-        lects_for_analysis = LectPairInformation(
-            lect_1, lect_2,
-            lect_vectors_1, lect_vectors_2,
-            lect_info_1, lect_info_2)
+        lects_for_analysis = gather_lect_information_from_df(df, i[0], i[1])
 
         # run metric and save the final results
         analysis_data, result = compare_lects_with_vectors(
@@ -65,8 +92,11 @@ def score_metrics_for_corpus_dataset(
             hybridisation_parameters
         )
         logger.info("Storing results in %s", store_path)
-        save_data_for_analysis(analysis_data, metrics_name, i[0], i[1], store_path)
-        logger.info("%s for %s and %s is %s", metrics_name, i[0], i[1], result)
+        result_info_parameters = MeasurementInfoParams(
+            dataset_name, metrics_name, i[0], i[1], store_path
+            )
+        save_data_for_analysis(analysis_data, result_info_parameters)
+        save_distances_info(result, result_info_parameters)
         overall_results.append((i, result))
     logger.info("Resulting distances are %s", overall_results)
     return overall_results
