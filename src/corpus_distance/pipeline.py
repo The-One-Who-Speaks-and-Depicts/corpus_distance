@@ -29,7 +29,7 @@ class ConfigurationParameters:
     Class with all the required parameters for pipeline running.
 
     Parameters:        
-        store_path(str): path to directory, where program will put the results
+        store_path(str): path to directory, where a package will store the results
         data_params(DataParameters): settings for data loading and preprocessing
         hybridisation_parameters(HybridisationParameters): settings for
         hybridisation metrics, for details see HybridisationParams documentation
@@ -52,9 +52,9 @@ def create_and_set_storage_directory(store_path: str) -> str:
     but stores files in the directory nonetheless.
 
     Parameters:
-        store_path(str): initial path to directory, where a program will put the results
+        store_path(str): initial path to directory, where a package will store the results
     Returns:
-        store_path(str): final path to directory, where a program will put the results
+        store_path(str): final path to directory, where a package will store the results
     """
     if not store_path or not isinstance(store_path, str):
         raise ValueError("Storage directory name is not a non-empty string")
@@ -118,6 +118,8 @@ def set_lda_params(lda_cfg: dict) -> LDAParams:
         lda_params.epochs = lda_cfg["epochs"]
     if lda_cfg["passes"]:
         lda_params.passes = lda_cfg["passes"]
+    if lda_cfg["random_state"]:
+        lda_params.random_state = lda_cfg["random_state"]
     if lda_cfg["required_topics_num"]:
         lda_params.required_topics_num = lda_cfg["required_topics_num"]
     if lda_cfg["required_topics_start"]:
@@ -136,7 +138,7 @@ def set_fast_text_params(fasttext_cfg: dict) -> FastTextParams:
         fasttext_cfg(dict): user-provided parameters for 
         FastText embeddings training
     Returns:
-        fasttext_params(FastTextParams): full set of FastTextParams for the model to train on
+        fasttext_params (FastTextParams): full set of FastTextParams for the model to train on
     """
     fasttext_params = FastTextParams()
     if fasttext_cfg["vector_size"]:
