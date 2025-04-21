@@ -24,7 +24,8 @@ def gather_lect_information_from_df(
     Gets required data for each lect from the provided dataframe, using names of lects.
 
     Arguments:
-        df (DataFrame): dataset with data
+        df (DataFrame): data frame with all the features (n-shingles; character-based embeddings;
+        alphabet entropy) for the lects
         lect_a_name (str): name of the first lect in comparison
         lect_b_name (str): name of the second lect in comparison
     
@@ -65,7 +66,8 @@ def score_metrics_for_corpus_dataset(
     and returns a list of results for each pair of lects in a consecutive order
 
     Parameters:
-        df (DataFrame): dataset with data
+        df (DataFrame): data frame with all the features (n-shingles; character-based embeddings;
+        alphabet entropy) for the lects
         metrics_name (str): name of metrics
         hybridisation_parameters(HybridisationParameters): a set of parameters
         for hybridisation
