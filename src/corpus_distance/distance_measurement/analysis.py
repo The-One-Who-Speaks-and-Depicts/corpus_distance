@@ -43,7 +43,7 @@ def save_distances_info(
         result (int | float): the distance value
         params (MeasurementInfoParams): the information about the measurement,
         including names of the compared lects, the dataset name, the metric name,
-        and the folder where the comparison results should get stored.
+        and the folder where the function stores comparison results.
     """
     if not isdir(params.store_path):
         raise ValueError(f'Path {params.store_path} does not exist')
@@ -70,7 +70,7 @@ def save_data_for_analysis(
         and hybrid
         params (MeasurementInfoParams): the information about the measurement,
         including names of the compared lects, the dataset name, the metric name,
-        and the folder where the comparison results should get stored.
+        and the folder where the function stores comparison results.
     """
     if not isdir(params.store_path):
         raise ValueError(f'Path {params.store_path} does not exist')

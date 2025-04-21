@@ -31,7 +31,8 @@ def gather_lect_information_from_df(
     Results:
         A LectPairInformation class instance that contains tokens,
         alphabet entropy and character-based embeddings for
-        each of the two lects under consideration
+        each of the two lects under consideration extracted from
+        the dataset
     """
     lect_a = list(df[df['lect'] == lect_a_name]['relative_frequency_n_grams'])[0]
     lect_b = list(df[df['lect'] == lect_b_name]['relative_frequency_n_grams'])[0]
@@ -54,10 +55,10 @@ def gather_lect_information_from_df(
 
 def score_metrics_for_corpus_dataset(
     df: DataFrame,
+    dataset_name: str = "Modern Standard Slavic",
     store_path: str = dirname(realpath(__file__)),
     metrics_name: str = "hybrid measurement",
-    hybridisation_parameters: HybridisationParameters = HybridisationParameters(),
-    dataset_name: str = "Modern Standard Slavic"
+    hybridisation_parameters: HybridisationParameters = HybridisationParameters()
     ) -> list[tuple[tuple[str,str], int|float]]:
     """
     A function that takes dataset, metrics name and parameters for hybridisation,
