@@ -20,8 +20,10 @@ class MeasurementInfoParams:
     about the distance measurement between two lects.
 
     Arguments:
-        dataset_name (str): the name of the dataset
-        metrics_name (str): the name of the metrics
+        dataset_name (str): the name of the dataset that include the lects being
+        measured
+        metrics_name (str): the name of the lect distance measurement metric that
+        compares the two lects 
         lect_a_name (str): the name of the first lect in comparison
         lect_b_name (str): the name of the second lect in comparison
         store_path (str): the folder where the function should save the results of comparison
@@ -40,7 +42,7 @@ def save_distances_info(
     Stores the distance value between the two lects in comparison.
 
     Arguments:
-        result (int | float): the distance value
+        result (int | float): the distance value between the two lects
         params (MeasurementInfoParams): the information about the measurement,
         including names of the compared lects, the dataset name, the metric name,
         and the folder where the function stores comparison results.

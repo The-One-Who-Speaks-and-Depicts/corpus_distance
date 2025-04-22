@@ -4,7 +4,8 @@ and returns the distance measurement values of the lects based on the provided
 texts in the dataset
 """
 
-from os.path import dirname, isdir, realpath
+from os import getcwd
+from os.path import isdir
 from logging import getLogger, NullHandler
 from pandas import DataFrame
 from corpus_distance.distance_measurement.analysis\
@@ -56,8 +57,8 @@ def gather_lect_information_from_df(
 
 def score_metrics_for_corpus_dataset(
     df: DataFrame,
-    dataset_name: str = "Modern Standard Slavic",
-    store_path: str = dirname(realpath(__file__)),
+    dataset_name: str,
+    store_path: str = getcwd(),
     metrics_name: str = "hybrid measurement",
     hybridisation_parameters: HybridisationParameters = HybridisationParameters()
     ) -> list[tuple[tuple[str,str], int|float]]:
