@@ -316,6 +316,7 @@ def perform_clusterisation(config_path: str = 'default') -> None:
     logger.debug('Dataset assembled')
     distances = score_metrics_for_corpus_dataset(
         data,
+        cfg.clusterisation_parameters.data_name,
         cfg.data_params.dataset_params.store_path,
         cfg.metrics_name,
         cfg.hybridisation_parameters
