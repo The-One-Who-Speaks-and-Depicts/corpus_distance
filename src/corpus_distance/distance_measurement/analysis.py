@@ -49,8 +49,9 @@ def save_distances_info(
     """
     if not isdir(params.store_path):
         raise ValueError(f'Path {params.store_path} does not exist')
+    path_to_store = join(params.store_path, params.metrics_name + ".info")
     with open(
-        join(params.store_path, params.metrics_name + ".info"), "a", encoding="utf-8"
+        path_to_store, "a", encoding="utf-8"
         ) as f:
         distance_info = [
             params.dataset_name, params.metrics_name,
@@ -58,7 +59,9 @@ def save_distances_info(
             str(result)
             ]
         f.write('\t'.join(distance_info) + "\n")
-    logger.debug("Distances for %s and %s stored", params.lect_a_name, params.lect_b_name)
+    logger.debug("Aggregated distance for %s and %s by %s stored in %s",
+                params.lect_a_name, params.lect_b_name,
+                params.metrics_name, path_to_store)
 
 def save_data_for_analysis(
         data_for_analysis: tuple[dict, dict],
@@ -107,10 +110,13 @@ def save_data_for_analysis(
             params.lect_a_name, params.lect_b_name, params.metrics_name, "Distance"
             ]
         )
-    errors_data.to_csv(
-        join(
-            params.store_path,
-            params.metrics_name + "_" + params.lect_a_name + "_" + params.lect_b_name + ".csv"
-            ), index=False
+    path_to_store = join(
+        params.store_path,
+        params.metrics_name + "_" + params.lect_a_name + "_" + params.lect_b_name + ".csv"
         )
-    logger.debug("Data for analysis of %s and %s stored", params.lect_a_name, params.lect_b_name)
+    errors_data.to_csv(
+        path_to_store, index=False
+        )
+    logger.debug("Comparison of analyzed units of %s and %s by %s is stored in %s",
+                params.lect_a_name, params.lect_b_name,
+                params.metrics_name, path_to_store)
