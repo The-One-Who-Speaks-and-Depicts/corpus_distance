@@ -36,6 +36,7 @@ class LDAParams:
     alpha: str = "auto"
     epochs: int = 300
     passes: int = 500
+    random_state: int = 0
     required_topics_num: int | None = None
     required_topics_start: int | None = None
 
@@ -118,12 +119,15 @@ def build_topic_words_for_lect(
         common_dictionary.doc2bow(text) for text in list_of_texts_split
         ]
 
-    logger.debug("Modelling %s topics", params.num_topics)
+    logger.debug("Modelling %s topics with %s alpha by %s epochs, %s passes; random_state is %s",
+                params.num_topics, params.alpha,
+                params.epochs, params.passes, params.random_state)
 
     lda = LdaModel(
         common_corpus,
         num_topics=params.num_topics, alpha=params.alpha,
-        iterations=params.epochs, passes=params.passes)
+        iterations=params.epochs, passes=params.passes,
+        random_state=params.random_state)
 
     lect_topic_words = []
 
@@ -133,7 +137,7 @@ def build_topic_words_for_lect(
         for j in lda.get_topic_terms(i):
             lect_topic_words.append(common_dictionary[j[0]])
 
-    lect_topic_words = list(set(lect_topic_words))
+    lect_topic_words = list(sorted(set(lect_topic_words)))
 
     logger.info(
         "Topics for %s lect are %s", lect, lect_topic_words
