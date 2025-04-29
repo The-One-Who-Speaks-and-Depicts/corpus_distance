@@ -22,11 +22,12 @@ def gather_lect_information_from_df(
         df: DataFrame,
         lect_a_name: str, lect_b_name: str) -> LectPairInformation:
     """
-    Gets required data for each lect from the provided dataframe, using names of lects.
+    Gets required data for each lect from the provided dataframe,
+    using names of the two lects in comparison.
 
     Arguments:
-        df (DataFrame): data frame with all the features (n-shingles; character-based embeddings;
-        alphabet entropy) for the lects
+        df (DataFrame): data frame with all the features, necessary
+        (n-shingles; character-based embeddings; alphabet entropy) for the analysis of lects
         lect_a_name (str): name of the first lect in comparison
         lect_b_name (str): name of the second lect in comparison
     
@@ -34,7 +35,7 @@ def gather_lect_information_from_df(
         A LectPairInformation class instance that contains tokens,
         alphabet entropy and character-based embeddings for
         each of the two lects under consideration extracted from
-        the dataset
+        the data frame
     """
     lect_a = list(df[df['lect'] == lect_a_name]['relative_frequency_n_grams'])[0]
     lect_b = list(df[df['lect'] == lect_b_name]['relative_frequency_n_grams'])[0]
