@@ -29,6 +29,7 @@ class LDAParams:
     alpha (str): alpha rate
     epochs (int): epochs number
     passes (int): passes for each epoch
+    random_state (int): setting random state for reproducibility
     required_topics_num (int): the number of topics to collect
     required_topics_start (int): the first (in a descending order) topic to collect
     """
