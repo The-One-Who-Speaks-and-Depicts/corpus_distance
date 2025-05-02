@@ -136,8 +136,8 @@ def save_vector_info_about_lect(output_dir: str, lect: Lect) -> None:
     Stores the character-based embeddings and alphabet entropy in the experiment directory.
     It dumps character-based embeddings into a series of .npy files in a vectors subdirectory,
     and alphabet entropy - to a common for all of the lects .tsv file
-    (lect name is the first column, denoted as Lect,
-    entropy value is the second column, denoted as Entropy).
+    (lect names are in the first column, denoted as Lect,
+    corresponding entropy values are in the second column, denoted as Entropy).
     
     Arguments:
         output_dir (str): initial path to directory, where a package will store 

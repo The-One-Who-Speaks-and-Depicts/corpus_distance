@@ -228,15 +228,18 @@ def add_topic_modelling(
     stripped off of topic words
 
     Arguments:
-        df(DataFrame): original dataframe with two columns,
+        df (DataFrame): original dataframe with two columns,
         text and lect
         output_dir (str): initial path to directory, where a package will store the results
-        topic_words(dict): dictionary with lect names
+        topic_words (dict): dictionary with lect names
         (must coincide with lects in df) and
         topic words of their texts,
         assigned respectively
-        substitute(bool): whether a text without stop words
-        substitutes the original, or not
+        substitute (str): defines, how model treats topic modelling results. 
+        The possible options are:
+            * 'substitute' - the model deletes all the topic words from the text
+            * 'not_substitute' - the model preserves the text as is
+            * 'topic_words_only' - the model preserves only topic words
     Returns:
         theme_df(DataFrame): a deep copy of the original dataframe,
         enriched with text without topic words
