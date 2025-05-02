@@ -20,12 +20,12 @@ class DatasetPreprocessingParams:
     undergoes during the preprocessing stage.
 
     Parameters:
-        content_path(str): path to directory with text files; text files should be
+        content_path (str): path to directory with text files; text files should be
         named as "TEXT.LECT.txt", and consist of tokenised texts, transformed into
         a single string
-        split(int|float): a number from 0 to 1, which signals, which percentage of
+        split (int|float): a number from 0 to 1, which signals, which percentage of
         source data should form the basis for clusterisation
-        topic_modelling(stringl): flag that describes the choice of user 
+        topic_modelling (string): flag that describes the choice of user 
         to change original text to text without topic words, not to change it,
         or use topic words only
     """
@@ -41,11 +41,11 @@ class DataParameters:
     part of pipeline
 
     Parameters:
-        dataset_params(DatasetPreprocessingParams): a set of parameters for dataset preprocessing,
+        dataset_params (DatasetPreprocessingParams): a set of parameters for dataset preprocessing,
         for details see DatasetPreprocessingParams documentation
-        lda_params(LDAParams): a set of parameters for latent dirichlet association
+        lda_params (LDAParams): a set of parameters for latent dirichlet association
         model of gensim package, for details see LDAParams documentation
-        fasttext_params(FastTextParams): a set of parameters for FastText model that
+        fasttext_params (FastTextParams): a set of parameters for FastText model that
         builds symbol vectors, for details see FastText documentation
     """
     dataset_params: DatasetPreprocessingParams = DatasetPreprocessingParams()
@@ -60,12 +60,12 @@ def assemble_dataset(
     uses default dataset.
 
     Arguments:
-        data_params(DataParameters): a set of parameters that define
+        data_params (DataParameters): a set of parameters that define
         the preprocessing of the dataset, as well as parameters for utilised
         machine learning models
     Returns:
-        df(DataFrame): a dataframe with information on n-gram frequencies,
-        symbol vectors, and alphabet enthropy, optionally cleared from 
+        df (DataFrame): a dataframe with information on n-gram frequencies,
+        symbol vectors, and alphabet entropy, optionally cleared from 
         the topic words
     """
     if not isinstance(data_params.dataset_params.store_path, str) \
@@ -87,7 +87,8 @@ def assemble_dataset(
         data_params.dataset_params.store_path,
         lects_with_topics,
         data_params.dataset_params.topic_modelling)
-    vecs = vec.create_vectors_for_lects(df, data_params.fasttext_params)
+    vecs = vec.create_vectors_for_lects(
+        df, data_params.dataset_params.store_path, data_params.fasttext_params)
     df = sp.split_lects_by_n_grams(df)
     df = freqscore.count_n_grams_frequencies(df)
     df = vec.gather_vector_information(df, vecs)

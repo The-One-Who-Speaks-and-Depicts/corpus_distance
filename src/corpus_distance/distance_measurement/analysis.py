@@ -4,7 +4,7 @@ into the results of the metrics inner workings.
 """
 from dataclasses import dataclass
 
-from os.path import isdir, join
+from os.path import isdir, join, exists
 
 from logging import getLogger, NullHandler
 
@@ -49,7 +49,14 @@ def save_distances_info(
     """
     if not isdir(params.store_path):
         raise ValueError(f'Path {params.store_path} does not exist')
-    path_to_store = join(params.store_path, params.metrics_name + ".info")
+    path_to_store = join(params.store_path, params.metrics_name + "_distances.tsv")
+    if not exists(path_to_store):
+        logger.debug(".tsv file for distances %s does not exist, creating...", path_to_store)
+        with open(path_to_store, "w", encoding="utf-8") as f:
+            distance_info_header = [
+                "Group", "Metric", "LectA", "LectB", "Distance"
+            ]
+            f.write('\t'.join(distance_info_header) + "\n")
     with open(
         path_to_store, "a", encoding="utf-8"
         ) as f:

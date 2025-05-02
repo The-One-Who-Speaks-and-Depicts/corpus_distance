@@ -100,6 +100,7 @@ sudo docker run -i -t IMAGE_NAME /bin/bash
                 "alpha": "auto",
                 "epochs": 300,
                 "passes": 500,
+                "random_state": 1,
                 "required_topics_start": 0,
                 "required_topics_num": 10
             },
@@ -107,7 +108,7 @@ sudo docker run -i -t IMAGE_NAME /bin/bash
                 "vector_size": 128,
                 "window": 15,
                 "min_count": 3,
-                "workers": 4,
+                "workers": 1,
                 "epochs": 300,
                 "seed": 42,
                 "sg": 1

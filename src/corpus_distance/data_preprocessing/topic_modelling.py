@@ -230,6 +230,7 @@ def add_topic_modelling(
     Arguments:
         df(DataFrame): original dataframe with two columns,
         text and lect
+        output_dir (str): initial path to directory, where a package will store the results
         topic_words(dict): dictionary with lect names
         (must coincide with lects in df) and
         topic words of their texts,

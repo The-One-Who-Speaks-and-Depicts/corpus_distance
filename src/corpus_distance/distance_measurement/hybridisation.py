@@ -30,8 +30,8 @@ class LectPairInformation:
         lect_b_vectors (dict[str, list [int|float]]): dictionary
         with symbols as keys and their vectors within n-grams
         as values for the first lect
-        lect_a_info (float): enthropy of the first lect alphabet
-        lect_b_info (float): enthropy of the second lect alphabet
+        lect_a_info (float): entropy of the first lect alphabet
+        lect_b_info (float): entropy of the second lect alphabet
     """
     lect_a_n_grams: list[(str, int | float)]
     lect_b_n_grams: list[(str, int | float)]
