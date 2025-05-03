@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "corpus_distance"
-version = "0.6.6"
+version = "0.6.6.1"
 authors = [
   { name="Ilia Afanasev", email="ilia.afanasev.1997@gmail.com" },
 ]

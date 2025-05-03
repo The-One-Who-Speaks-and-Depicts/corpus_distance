@@ -40,19 +40,19 @@ def gather_lect_information_from_df(
     lect_a = list(df[df['lect'] == lect_a_name]['relative_frequency_n_grams'])[0]
     lect_b = list(df[df['lect'] == lect_b_name]['relative_frequency_n_grams'])[0]
 
-    lect_info_a = list(df[df['lect'] == lect_a_name]['lect_info'])[0]
-    lect_info_b = list(df[df['lect'] == lect_b_name]['lect_info'])[0]
-
     lect_vectors_a = list(df[df['lect'] == lect_a_name]['lect_vectors'])[0]
     lect_vectors_b = list(df[df['lect'] == lect_b_name]['lect_vectors'])[0]
+
+    lect_info_a = list(df[df['lect'] == lect_a_name]['lect_info'])[0]
+    lect_info_b = list(df[df['lect'] == lect_b_name]['lect_info'])[0]
 
     return LectPairInformation(
         lect_a,
         lect_b,
-        lect_info_a,
-        lect_info_b,
         lect_vectors_a,
-        lect_vectors_b
+        lect_vectors_b,
+        lect_info_a,
+        lect_info_b
     )
 
 

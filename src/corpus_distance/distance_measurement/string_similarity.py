@@ -4,12 +4,15 @@ wrappings for different string similarity measures,
 in order for them to be sufficiently
 integrated into the pipeline.
 """
+from logging import getLogger, NullHandler
+
 from dataclasses import dataclass, field
 import Levenshtein
 from scipy.spatial.distance import euclidean
 from pyjarowinkler.distance import get_jaro_distance as jw
 
-
+logger = getLogger(__name__)
+logger.addHandler(NullHandler())
 
 @dataclass
 class StringSimilarityMeasurementInfo:
