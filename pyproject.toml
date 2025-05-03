@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "corpus_distance"
-version = "0.6.5"
+version = "0.6.6"
 authors = [
-  { name="Ilia Afanasev", email="szrnamerg@gmail.com" },
+  { name="Ilia Afanasev", email="ilia.afanasev.1997@gmail.com" },
 ]
 description = "Python package for measuring distance between the lects represented by small raw corpora"
 readme = "README.md"
