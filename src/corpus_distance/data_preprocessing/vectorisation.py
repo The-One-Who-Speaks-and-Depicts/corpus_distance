@@ -134,7 +134,10 @@ def get_letter_vectors_for_lect(text: str, alphabet: list[str],
 def save_vector_info_about_lect(output_dir: str, lect: Lect) -> None:
     """
     Stores the character-based embeddings and alphabet entropy in the experiment directory.
-    It dumps character-based embeddings into a series of .npy files in a vectors subdirectory,
+    It dumps character-based embeddings into a series of .npy files in a vectors subdirectory.
+    The name for each .npy file is a hexadecimal representation of a symbol order number
+    in Unicode. For example, file `0x46b.npy` is going to have embeddings for big jus (ѫ).
+    This is due to the fact that some symbols (like slash \\) are not allowed in file names.  
     and alphabet entropy - to a common for all of the lects .tsv file
     (lect names are in the first column, denoted as Lect,
     corresponding entropy values are in the second column, denoted as Entropy).
@@ -153,11 +156,14 @@ def save_vector_info_about_lect(output_dir: str, lect: Lect) -> None:
     logger.debug("Creating directory to store the embeddings: %s", vector_dir_path)
     mkdir(vector_dir_path)
     for k, v in lect.alphabetic_vectors.items():
-        embeddings_path = join(vector_dir_path, f"{k}_embeddings.npy")
+        symbol_in_unicode_encoding = str(hex(ord(k)))
+        embeddings_path = join(
+            vector_dir_path, f"{symbol_in_unicode_encoding}_embeddings.npy"
+            )
         save_embeddings(embeddings_path, v)
         logger.debug(
             "Vectors for %s stored in %s",
-            k,
+            symbol_in_unicode_encoding,
             embeddings_path
             )
     entropy_path = join(output_dir, 'lect_entropies.tsv')
