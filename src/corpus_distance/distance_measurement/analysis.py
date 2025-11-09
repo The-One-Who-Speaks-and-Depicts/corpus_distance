@@ -11,7 +11,7 @@ from logging import getLogger, NullHandler
 from pandas import DataFrame
 
 logger = getLogger(__name__)
-logger.addHandler(NullHandler)
+logger.addHandler(NullHandler())
 
 @dataclass
 class MeasurementInfoParams:

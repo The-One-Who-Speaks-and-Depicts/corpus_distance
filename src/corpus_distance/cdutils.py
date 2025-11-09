@@ -12,7 +12,7 @@ from numpy import percentile
 from tqdm import tqdm
 
 logger = getLogger(__name__)
-logger.addHandler(NullHandler)
+logger.addHandler(NullHandler())
 
 def clear_stop_words(text: str, stop_words: list[str]) -> str:
     """
