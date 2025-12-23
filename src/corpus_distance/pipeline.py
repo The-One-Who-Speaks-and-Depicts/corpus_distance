@@ -40,8 +40,12 @@ class ConfigurationParameters:
     """
     metrics_name: str = "default_metrics_name"
     data_params: DataParameters = field(default_factory=DataParameters)
-    hybridisation_parameters: HybridisationParameters = field(default_factory=HybridisationParameters)
-    clusterisation_parameters: ClusterisationParameters = field(default_factory=ClusterisationParameters)
+    hybridisation_parameters: HybridisationParameters = field(
+        default_factory=HybridisationParameters
+        )
+    clusterisation_parameters: ClusterisationParameters = field(
+        default_factory=ClusterisationParameters
+        )
 
 
 def create_and_set_storage_directory(store_path: str) -> str:

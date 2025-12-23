@@ -49,7 +49,7 @@ class DataParameters:
         builds symbol vectors, for details see FastText documentation
     """
     dataset_params: DatasetPreprocessingParams = field(default_factory=DatasetPreprocessingParams)
-    lda_params: tm.LDAParams = field(default_factory=tm.LDAParams) 
+    lda_params: tm.LDAParams = field(default_factory=tm.LDAParams)
     fasttext_params: vec.FastTextParams = field(default_factory=vec.FastTextParams)
 
 def assemble_dataset(

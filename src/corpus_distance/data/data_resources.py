@@ -7,9 +7,9 @@ Also a wrapping module for the default configuration
 """
 
 
+from importlib import resources
 import json
 from pandas import read_csv
-from importlib import resources
 
 
 data_stream = resources.files(__name__).joinpath("gospels.csv")
