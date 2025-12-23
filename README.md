@@ -20,6 +20,10 @@ One more important notion is that one should be very careful with using this pac
 
 # How to install
 
+## Version warning
+
+By now, `corpus_distance` is not available for Python>=3.14. Use 3.12 for the smoothest possible experience.
+
 ## From TestPyPI (development version; requires manual installation of dependencies; may contain bugs)
 
 ```
