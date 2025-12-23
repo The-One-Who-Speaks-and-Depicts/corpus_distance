@@ -2,7 +2,7 @@
 Pipeline module streamlines data import and preprocessing, as well as
 distance measurement and clusterisation of lects
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import importlib
 import json
 from logging import getLogger, NullHandler
@@ -39,10 +39,13 @@ class ConfigurationParameters:
         clusterisation, for details see ClusterisationParameters documentation
     """
     metrics_name: str = "default_metrics_name"
-    data_params: DataParameters = DataParameters()
-    hybridisation_parameters: HybridisationParameters = HybridisationParameters()
-    clusterisation_parameters: ClusterisationParameters = ClusterisationParameters()
-
+    data_params: DataParameters = field(default_factory=DataParameters)
+    hybridisation_parameters: HybridisationParameters = field(
+        default_factory=HybridisationParameters
+        )
+    clusterisation_parameters: ClusterisationParameters = field(
+        default_factory=ClusterisationParameters
+        )
 
 
 def create_and_set_storage_directory(store_path: str) -> str:

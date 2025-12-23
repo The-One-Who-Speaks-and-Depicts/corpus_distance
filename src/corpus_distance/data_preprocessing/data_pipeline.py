@@ -3,7 +3,7 @@ Data pipeline module gathers all the data preprocessing functions
 into a single straightforward transformation for
 a more comfortable user experience
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from os.path import exists
 from pandas import DataFrame
 import corpus_distance.data_preprocessing.data_loading as loading
@@ -48,9 +48,9 @@ class DataParameters:
         fasttext_params (FastTextParams): a set of parameters for FastText model that
         builds symbol vectors, for details see FastText documentation
     """
-    dataset_params: DatasetPreprocessingParams = DatasetPreprocessingParams()
-    lda_params: tm.LDAParams = tm.LDAParams()
-    fasttext_params: vec.FastTextParams = vec.FastTextParams()
+    dataset_params: DatasetPreprocessingParams = field(default_factory=DatasetPreprocessingParams)
+    lda_params: tm.LDAParams = field(default_factory=tm.LDAParams)
+    fasttext_params: vec.FastTextParams = field(default_factory=vec.FastTextParams)
 
 def assemble_dataset(
         data_params: DataParameters = DataParameters()

@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "corpus_distance"
-version = "0.6.7"
+version = "0.7.1"
 authors = [
   { name="Ilia Afanasev", email="ilia.afanasev.1997@gmail.com" },
 ]
 description = "Python package for measuring distance between the lects represented by small raw corpora"
 readme = "README.md"
-requires-python = ">=3.10.12"
+requires-python = ">=3.12.0, <3.14.0"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
@@ -18,16 +18,16 @@ classifiers = [
 ]
 dependencies = [
   "setuptools>=67.7.2",
-  "biopython==1.83",
-  "gensim==4.3.2",
-  "Levenshtein==0.25.0",
-  "matplotlib==3.7.1",
-  "numpy==1.26.0",
-  "pandas==2.1.1",
-  "pyjarowinkler==1.8",
-  "scipy==1.11.4",
-  "tqdm==4.66.4",
-  "packaging==21.3"
+  "biopython==1.86",
+  "gensim==4.4.0",
+  "Levenshtein==0.27.3",
+  "matplotlib==3.10.8",
+  "numpy==2.4.0",
+  "pandas==2.3.3",
+  "pyjarowinkler==3.0.0",
+  "scipy==1.16.3",
+  "tqdm==4.67.1",
+  "packaging==25.0"
 ]
 
 [project.urls]

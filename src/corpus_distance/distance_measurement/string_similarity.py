@@ -7,7 +7,8 @@ integrated into the pipeline.
 from dataclasses import dataclass, field
 import Levenshtein
 from scipy.spatial.distance import euclidean
-from pyjarowinkler.distance import get_jaro_distance as jw
+from pyjarowinkler.distance import get_jaro_distance as jaro_dist
+from pyjarowinkler.distance import  get_jaro_winkler_distance as jw
 
 
 
@@ -174,7 +175,7 @@ def jaro_vector_wrapper(strings_info: StringSimilarityMeasurementInfo) -> float:
     if ((not strings_info.ent1 or not strings_info.ent1) \
         and strings_info.alphabet_normalisation):
         raise ValueError("There is no alphabet entropy information")
-    jaro = jw(strings_info.str1, strings_info.str2, winkler = False)/\
+    jaro = jaro_dist(strings_info.str1, strings_info.str2)/\
     max([len(strings_info.str1), len(strings_info.str2)])
     sum_s1 = sum(
     list(strings_info.vec1[v] for _, v in list(
