@@ -4,12 +4,19 @@ split of lects into groups,
 based on the results of distance measurements, conducted earlier.
 """
 from logging import getLogger, NullHandler
-from os.path import isdir, dirname, realpath
+from os.path import isdir, join, dirname, realpath
 from dataclasses import dataclass, field
 from typing import Callable
 from Bio.Phylo.BaseTree import Tree
 from Bio.Phylo.TreeConstruction import _DistanceMatrix, DistanceTreeConstructor
-from corpus_distance.clusterisation import utils
+from corpus_distance.visualisation.clusterisation import (
+#    visualise_network,
+    visualise_tree
+)
+from corpus_distance.visualisation.distance_measurement import plot_clustermap
+from corpus_distance.distance_measurement.utils import create_matrix
+from corpus_distance.clusterisation.utils import detect_outgroup
+
 
 logger = getLogger(__name__)
 logger.addHandler(NullHandler())
@@ -72,18 +79,42 @@ def clusterise_lects_from_distance_matrix(
     if not isdir(clusterisation_parameters.store_path):
         raise ValueError("Directory does not exist")
     logger.info('Distances are %s', pairwise_distances)
-    distance_matrix = utils.create_distance_matrix(pairwise_distances,
-                                                   clusterisation_parameters.lects)
+    matrix = create_matrix(
+            pairwise_distances,
+            clusterisation_parameters.lects,
+            False
+            )
+    logger.info('Preliminary matrix is %s', matrix)
+    heatmap = plot_clustermap(matrix, clusterisation_parameters.lects)
+    heatmap_path = join(
+        clusterisation_parameters.store_path,
+        "heatmap_" + clusterisation_parameters.metrics + ".png"
+    )
+    logger.info('Storing clustermap visualisation in %s', heatmap_path)
+    heatmap.savefig(heatmap_path)
+    diag_matrix = create_matrix(pairwise_distances, clusterisation_parameters.lects)
+    distance_matrix = _DistanceMatrix(
+        clusterisation_parameters.lects,
+            diag_matrix
+            )
     logger.info('Distance matrix is %s', distance_matrix)
+    
     tree = get_tree(distance_matrix,
                     clusterisation_parameters.classification_method)
     logger.info('Tree is %s', tree)
-    utils.detect_outgroup(tree,
+    detect_outgroup(tree,
                           clusterisation_parameters.outgroup,
                           clusterisation_parameters.data_name,
                           clusterisation_parameters.metrics,
                           clusterisation_parameters.store_path)
-    utils.visualise_tree(tree,
+    tree_visualisation = visualise_tree(tree,
                          clusterisation_parameters.metrics,
                          clusterisation_parameters.data_name,
                          clusterisation_parameters.store_path)
+    tree_visualisation_path = join(
+        clusterisation_parameters.store_path,
+        "phylogeny_" + clusterisation_parameters.metrics +\
+        "_" + clusterisation_parameters.data_name + ".png"
+    )
+    logger.debug('Storing tree visualisation in %s', tree_visualisation_path)
+    tree_visualisation.savefig(tree_visualisation_path)

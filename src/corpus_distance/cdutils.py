@@ -23,11 +23,18 @@ Functions:
     Otherwise, returns the original distribution.
     get_unique_pairs(list[str]) -> list[LectPair]: takes a list of objects designated as lects,
     and transforms it into a list of non-repeating pairs.
+    create_and_set_storage_directory(str) -> str: creates a directory to store the results
+    of the experiments. In case the directory already exists, raises the warning. Returns
+    a path to the directory, in case a user needs it.
 """
 from copy import deepcopy
+from os import mkdir, listdir
+from os.path import exists
+from warnings import warn
 from logging import getLogger, NullHandler
 from typing import NamedTuple
 
+from numpy import issubdtype, number
 from pandas import DataFrame
 from numpy import percentile
 from tqdm import tqdm
@@ -123,11 +130,7 @@ def get_to_0_1(distribution: list[int|float]) -> list [int|float]:
     """
     logger.debug("Input params: %s", locals())
     if not isinstance(distribution, list) or not all(
-        # disable undidiomatic typecheck, because otherwise
-        # the code is going to become a boilerplate,
-        # or I am going to get boolean go further
-        # pylint: disable=unidiomatic-typecheck
-        type(x) is int or type(x) is float for x in distribution
+        issubdtype(type(x), number) for x in distribution
         ):
         raise ValueError(f"Distribution should be a list of integers, got {distribution} instead")
     # There is no need to perform normalisation per se, so if the distribution
@@ -184,10 +187,7 @@ def delete_outliers(original_distribution: list[int|float]
         raise ValueError(
             f"The input type should be a list, got {original_distribution}"
             )
-    # disable undidiomatic typecheck, because otherwise the code is going to become a boilerplate,
-    # or I am going to get boolean go further
-    # pylint: disable=unidiomatic-typecheck
-    if any(type(x) is not int and type(x) is not float for x in original_distribution):
+    if any(not issubdtype(type(x), number) for x in original_distribution):
         raise ValueError(
             f"The input type should be a numerical list, got {original_distribution}"
         )
@@ -239,3 +239,26 @@ def get_unique_pairs(lects: list[str]) -> list[LectPair]:
         lects_to_check = [k for k in lects_to_check if k != i]
     logger.info("Unique pairs: %s", ";".join([i[0] + i[1] for i in unique_pairs]))
     return unique_pairs
+
+
+def create_and_set_storage_directory(store_path: str) -> str:
+    """
+    Sets directory for experiment results, in case of its absence,
+    creates it. In case the directory is not empty, throws a warning,
+    but stores files in the directory nonetheless.
+
+    Parameters:
+        store_path(str): initial path to directory, where a package will store the results
+    Returns:
+        store_path(str): final path to directory, where a package will store the results
+    """
+    if not isinstance(store_path, str) or not store_path.strip():
+        raise ValueError("Storage directory name is not a non-empty string")
+    if not exists(store_path):
+        logger.info("Creating directory %s", store_path)
+        mkdir(store_path)
+    if len(listdir(store_path)) > 0:
+        warn(
+            f"Storage directory {store_path} is not empty, consider choosing the other one"
+            )
+    return store_path

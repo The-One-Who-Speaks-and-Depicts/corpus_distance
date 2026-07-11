@@ -13,6 +13,8 @@ from os.path import join, isfile, isdir
 from logging import getLogger, NullHandler
 from itertools import islice
 from math import ceil
+
+from numpy import issubdtype, number
 from pandas import DataFrame
 import corpus_distance.data.data_resources as datares
 
@@ -42,10 +44,7 @@ def load_data(content_directory: str , split: int | float = 1) -> DataFrame:
             )
     if not isdir(content_directory):
         raise ValueError("content_directory is not an existing path to a folder!")
-    # disable undidiomatic typecheck, because otherwise the code is going to become a boilerplate,
-    # or I am going to get boolean go further
-    # pylint: disable=unidiomatic-typecheck
-    if not (type(split) is int or type(split) is float):
+    if not (issubdtype(type(split), number)):
         raise ValueError(f"split should be an integer or a float, received {split}")
     if not 0 < split <= 1:
         raise ValueError(
