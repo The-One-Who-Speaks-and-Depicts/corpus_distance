@@ -132,15 +132,21 @@ class TestLoadData(unittest.TestCase):
 
     def test_load_data_wrong_txt_file(self):
         """
-        Assures the correct execution of the function in the base case,
-        with split being 1.
+        Assures the correct execution of the function in the case,
+        when the only text file does not have a proper naming.
         """
         lect = 'dummy'
         text = 'token dummy token'
         with open(join(self.dir, lect + '.txt'), 'w', encoding='utf-8') as f:
             f.write(text)
+        warning = 'WARNING:corpus_distance.data_preprocessing.data_loading:'\
+            'No data loaded, proceed with caution'
 
-        self.assertRaises(ValueError, dl.load_data, self.dir)
+        with self.assertLogs(dl.logger.name, "WARNING") as captured:
+            dl.load_data (self.dir, 1)
+
+        self.assertTrue(warning in captured.output)
+
 
 
     def test_load_data_other_file_types(self):

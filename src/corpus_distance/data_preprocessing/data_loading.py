@@ -48,18 +48,16 @@ def load_data(content_directory: str , split: int | float = 1) -> DataFrame:
     if not (type(split) is int or type(split) is float):
         raise ValueError(f"split should be an integer or a float, received {split}")
     if not 0 < split <= 1:
-        raise ValueError("split argument has an incorrect value, the allowed range is from 0 to 1")
+        raise ValueError(
+            "split argument has an incorrect value, the allowed range"
+            f"is from 0 (exclusive) to 1 (inclusive), received {split}"
+            )
     texts = {}
     for filename in listdir(content_directory):
         f = join(content_directory, filename)
         # checking if it is a txt file
-        if isfile(f) and f.endswith('.txt'):
+        if isfile(f) and f.endswith('.txt') and len(f.split('.')) >=3:
             logger.info("Preprocessing file %s", f)
-            split_file_name = f.split('.')
-            if len(split_file_name) < 3:
-                raise ValueError(f"File {f} should have been named "\
-                                 "according to the TEXT.LECT.txt template"\
-                                 f", received {f}")
             lect = filename.split('.')[-2]
             with open(f, 'r', encoding='utf-8') as inp:
                 content = inp.read().lower().strip().split(' ')
@@ -71,7 +69,7 @@ def load_data(content_directory: str , split: int | float = 1) -> DataFrame:
     # throwing an error would become too enforcing. Therefore, I put the logger warning.
     if df.shape[0] == 0:
         logger.warning("No data loaded, proceed with caution")
-    logger.debug("Data loaded: %s", df)
+    logger.debug("Result: %s", df)
     return df
 
 
