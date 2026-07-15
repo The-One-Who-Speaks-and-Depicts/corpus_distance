@@ -2,6 +2,41 @@
 Topic modelling module helps to clear the text
 from the topic words, relevant for particular
 documents or document genres.
+
+Functions:
+
+* set_topic_range (params: LDAParams) -> tuple[int, int]: takes 
+the set of parameters for topic modelling and returns the range of topics
+to undergo selection.
+* build_topic_words_for_lect (df: DataFrame, lect: str,
+        first_topic: int, topic_range_limit: int,
+        params: LDAParams = LDAParams()) -> lect[str]: takes several parameters
+to perform the topic modelling of data. The data itself is df, a pandas data frame. 
+The lect name, for the texts of which the function performs topic modelling is lect, a string.
+first_topic is a positive integer that denotes the sequentially first topic to pick
+(topic modelling tools usually sort their topics in terms of crux), topic_range_limit is 
+the first topic not to pick. params contains the topic modelling parameters.
+Function returns list of topic words, each being a string. 
+* get_topic_words_for_lect(df: DataFrame, params: LDAParams()) -> dict:
+takes a pandas data frame with columns 'lect' and 'text' in it,
+and a set of parameters for topic modelling.
+Returns a dictionary that has lects as its keys and the corresponding topic words
+as its values
+* save_topic_modelling_results(topic_words: dict, theme_df: DataFrame, output_dir: str):
+takes a dictionary (with lects as keys and collections of topic words as values),
+a data frame (with a column 'text_topics_normalised' in it) and a string (pointing to
+the directory where the function should store the results), and saves two .csv files: one
+with lects and the corresponding topic words, and the second with the original text for each
+lect ('text'), the lect name ('lect') and the results of the application of the topic
+modelling results to the original text ('text_topic_normalised').
+* add_topic_modelling (df: DataFrame,
+topic_words: dict, substitute: str = 'not_substitute') -> DataFrame: takes
+a pandas data frame with columns 'lect' and 'text' in it,
+a dictionary (with lects as keys and collections of topic words as values), and
+a string, pointing to the type of adding topic modelling to the dataset: only storing
+its results ('not_substitute'), replacing the original text with its results ('topic_words_only'),
+or removing its results from the original text ('substitute'). It passes further
+the data frame with the results (or lack thereof) in a column 'text_topic_normalised'. 
 """
 
 from copy import deepcopy
@@ -13,7 +48,7 @@ from pandas import DataFrame
 from gensim.corpora.dictionary import Dictionary
 from gensim.models import LdaModel
 
-from corpus_distance.cdutils import clear_stop_words, return_topic_words
+from corpus_distance.cdutils import clear_stop_words, return_topic_words, get_lects_from_dataframe
 
 logger = getLogger(__name__)
 logger.addHandler(NullHandler())
@@ -59,6 +94,7 @@ def set_topic_range(params: LDAParams = LDAParams()) -> tuple[int, int]:
         If function returns (2, 5), then the selected topics will be 2, 3, 4
 
     """
+    logger.debug("Input params: %s", locals())
     if params.required_topics_start and (
         params.required_topics_start < 0 or \
         params.required_topics_start >= params.num_topics
@@ -109,20 +145,25 @@ def build_topic_words_for_lect(
         lect_topic_words (list[str]): list of strings, each denoting a word from the topics,
         generated for lect by LDA
     """
+    logger.debug("Input params: %s", locals())
+
+    if not isinstance(df, DataFrame) or 'lect' not in df.columns or 'text' not in df.columns:
+        raise ValueError(f"df should be a data frame that has column lect in it, received {df}")
+
+    if not isinstance(params, LDAParams):
+        raise ValueError(f"The params for LDA should be an LDAParams object, received {params}")
+
     logger.info("Building topics for %s lect", lect)
 
     list_of_texts_split = [
         i.split(' ') for i in list(df[df['lect'] == lect]['text'])
         ]
+
     common_dictionary = Dictionary(list_of_texts_split)
 
     common_corpus = [
         common_dictionary.doc2bow(text) for text in list_of_texts_split
         ]
-
-    logger.debug("Modelling %s topics with %s alpha by %s epochs, %s passes; random_state is %s",
-                params.num_topics, params.alpha,
-                params.epochs, params.passes, params.random_state)
 
     lda = LdaModel(
         common_corpus,
@@ -149,8 +190,7 @@ def build_topic_words_for_lect(
 
 
 def get_topic_words_for_lects(
-    df: DataFrame, lects: list[str],
-    params: LDAParams = LDAParams()) -> dict:
+    df: DataFrame, params: LDAParams = LDAParams()) -> dict:
     """
     Takes text in each lect within the given datasets
     to return topic words for each given lect
@@ -158,7 +198,6 @@ def get_topic_words_for_lects(
 
     Arguments:
         df(DataFrame): a dataframe with texts and lects
-        lects(list[str]): a set of lects
         params(LDAParams): a dictionary with possible 
         parameters for LdaModel
         
@@ -166,12 +205,9 @@ def get_topic_words_for_lects(
         topic_words(dict): dictionary with lects as keys,
         and topic words for the texts as values
     """
-    if 'lect' not in df.columns or 'text' not in df.columns:
+    logger.debug("Input params: %s", locals())
+    if not isinstance(df, DataFrame) or 'lect' not in df.columns or 'text' not in df.columns:
         raise ValueError("No either \'lect\' or \'text\' columns")
-    if not isinstance(lects, list) or not all(
-        isinstance(i, str) for i in lects
-        ):
-        raise ValueError("Lects should be a list of strings")
     if not isinstance(params, LDAParams):
         raise ValueError("Params should be of type LDAParams")
     if params.num_topics < 1 or params.epochs < 1 \
@@ -183,13 +219,14 @@ def get_topic_words_for_lects(
     first_topic, last_topic = set_topic_range(params)
 
     topic_words = {}
-    logger.debug("Input checks passed. Topic modelling started.")
+
+    lects = get_lects_from_dataframe(df)
 
     for lect in lects:
         topic_words[lect] = build_topic_words_for_lect(
             df, lect, first_topic, last_topic, params
             )
-
+    logger.debug("Result: %s", topic_words)
     return topic_words
 
 
@@ -208,12 +245,29 @@ def save_topic_modelling_results(
         theme_df (DataFrame): a DataFrame with the results of topic modelling
         output_dir (str): the directory where the results are going to be stored
     """
+    logger.debug("Input params: %s", locals())
+    if not isinstance(theme_df, DataFrame) or list(
+        set(theme_df.columns)
+        ) != list(set(['lect', 'text', 'text_topic_normalised'])):
+        raise ValueError("theme_df should be a pandas DataFrame with" \
+                          "columns \'lect\', \'text\' and \'text_topic_normalised\', " \
+                          f"received {theme_df}")
+    if not isinstance(topic_words, dict) or list(set(
+        topic_words.keys()
+    )) != list(
+        set(theme_df['lect'].unique())
+        ):
+        raise ValueError("topic_words should be a dictionary with the same lects as keys" \
+        f" as values in the theme_df \'lect\' column, received {topic_words}")
+    if not isinstance(output_dir, str) or not exists(output_dir):
+        raise ValueError("output_dir should be a path to an existing directory, " \
+                         f"received {output_dir}")
     topic_words_df = DataFrame(
         topic_words.items(), columns = ['lect', 'topic_words']
-        )
+        ).set_index('lect')
     topic_words_df.to_csv(
         join(output_dir, 'topic_words_by_lect.csv'),
-        index = False
+        index_label='lect'
         )
     theme_df.to_csv(
         join(output_dir, 'thematic_modelling_output.csv'),
@@ -221,16 +275,15 @@ def save_topic_modelling_results(
         )
 
 def add_topic_modelling(
-    df: DataFrame, output_dir: str,
+    df: DataFrame,
     topic_words: dict, substitute: str = 'not_substitute') -> DataFrame:
     """
     Enriches the original dataset with texts, 
-    stripped off of topic words
+    stripped off of topic words.
 
     Arguments:
         df (DataFrame): original dataframe with two columns,
         text and lect
-        output_dir (str): initial path to directory, where a package will store the results
         topic_words (dict): dictionary with lect names
         (must coincide with lects in df) and
         topic words of their texts,
@@ -244,11 +297,10 @@ def add_topic_modelling(
         theme_df(DataFrame): a deep copy of the original dataframe,
         enriched with text without topic words
     """
-    if 'lect' not in df.columns or 'text' not in df.columns:
+    logger.debug("Input params: %s", locals())
+    if not isinstance(df, DataFrame) or 'lect' not in df.columns or 'text' not in df.columns:
         raise ValueError("No either \'lect\' or \'text\' columns")
-    if not isinstance(topic_words, dict):
-        raise ValueError("Topic words should be dictionary")
-    if not all(
+    if not isinstance(topic_words, dict) or not all(
         isinstance(i, str) for i in topic_words.keys()
         ):
         raise ValueError("The keys of topic words should be strings")
@@ -257,30 +309,32 @@ def add_topic_modelling(
                 isinstance(j, str) for j in i
                 ) for i in topic_words.values()
             ):
-        for i in topic_words.values():
-            print(i, isinstance(i, list))
-            for j in i:
-                print(j, isinstance(j, str))
         raise ValueError("The values of topic words should be lists of strings")
-    if not exists(output_dir):
-        raise ValueError("Output directory does not exist")
+    if list(set(
+        topic_words.keys()
+    )) != list(
+        set(df['lect'].unique())
+        ):
+        raise ValueError("topic_words should be a dictionary with the same lects as keys" \
+        f" as values in the theme_df \'lect\' column, received {topic_words}")
     if not isinstance(substitute, str) or substitute not in [
         'not_substitute', 'substitute', 'topic_words_only'
         ]:
         raise ValueError("Substitute should be a string \
         either \'not_substitute\', \'substitute\' or \'topic_words_only\'")
-    logger.debug("Input checks passed. Adding thematic modelling.")
     theme_df = deepcopy(df)
-    if substitute == 'topic_words_only':
-        theme_df['text_topic_normalised'] = theme_df.apply(
-        lambda x: return_topic_words(x['text'], topic_words[x['lect']]),
-        axis = 1)
-    if substitute == 'substitute':
-        theme_df['text_topic_normalised'] = theme_df.apply(
-            lambda x: clear_stop_words(x['text'], topic_words[x['lect']]),
-            axis = 1)
-    save_topic_modelling_results(topic_words, theme_df, output_dir)
+    match substitute:
+        case 'topic_words_only':
+            theme_df['text_topic_normalised'] = theme_df.apply(
+                lambda x: return_topic_words(x['text'], topic_words[x['lect']]),
+                axis = 1)
+        case 'substitute':
+            theme_df['text_topic_normalised'] = theme_df.apply(
+                lambda x: clear_stop_words(x['text'], topic_words[x['lect']]),
+                axis = 1)
+        case 'not_substitute':
+            theme_df['text_topic_normalised'] = theme_df['text']
     if substitute in ['substitute', 'topic_words_only']:
         theme_df['text'] = theme_df['text_topic_normalised']
-    logger.debug('Thematic modelling is finished.')
+    logger.debug('Result: %s', theme_df)
     return theme_df
