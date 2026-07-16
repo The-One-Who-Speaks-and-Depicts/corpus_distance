@@ -81,9 +81,9 @@ class TestAssigningNGramsToLects(unittest.TestCase):
         """
         data = {"1": ["fdg", "cdg"], "2": ["abc", "cdg"]}
 
-        df = pd.DataFrame.from_dict(data, orient="index", columns=["test", "lest"])
+        data_frame = pd.DataFrame.from_dict(data, orient="index", columns=["test", "lest"])
 
-        self.assertRaises(ValueError, shm.assign_n_grams_to_lects, df)
+        self.assertRaises(ValueError, shm.assign_n_grams_to_lects, data_frame)
 
     def test_one_correct_column(self):
         """
@@ -91,9 +91,9 @@ class TestAssigningNGramsToLects(unittest.TestCase):
         """
         data = {"1": ["fdg", "cdg"], "2": ["abc", "cdg"]}
 
-        df = pd.DataFrame.from_dict(data, orient="index", columns=["text", "lect"])
+        data_frame = pd.DataFrame.from_dict(data, orient="index", columns=["text", "lect"])
 
-        self.assertRaises(ValueError, shm.assign_n_grams_to_lects, df)
+        self.assertRaises(ValueError, shm.assign_n_grams_to_lects, data_frame)
 
     def test_correct_params(self):
         """
@@ -102,13 +102,13 @@ class TestAssigningNGramsToLects(unittest.TestCase):
         data =  {"0": ["Smol", ["^f$","^dgf","dgfd","gfdg","fdg$"]],
                       "1": ["Pol", ["^fd$","^gfd","gfdg","fdg$"]],
                       "2": ["Pol", ["^f$"]]}
-        df = pd.DataFrame.from_dict(data, orient="index", columns=["lect", "n_grams"])
+        data_frame = pd.DataFrame.from_dict(data, orient="index", columns=["lect", "n_grams"])
         result_dict = {
             "Smol": ["^f$","^dgf","dgfd","gfdg","fdg$"],
             "Pol": ["^fd$","^gfd","gfdg","fdg$", "^f$"]
         }
 
-        n_grams_by_lects = shm.assign_n_grams_to_lects(df)
+        n_grams_by_lects = shm.assign_n_grams_to_lects(data_frame)
 
         self.assertEqual(n_grams_by_lects, result_dict)
 
@@ -124,9 +124,9 @@ class TestSplitDfIntoNShigles(unittest.TestCase):
         """
         data = {"1": ["fdg", "cdg"], "2": ["abc", "cdg"]}
 
-        df = pd.DataFrame.from_dict(data, orient="index", columns=["test", "lest"])
+        data_frame = pd.DataFrame.from_dict(data, orient="index", columns=["test", "lest"])
 
-        self.assertRaises(ValueError, shm.split_lects_by_n_grams, df)
+        self.assertRaises(ValueError, shm.split_lects_by_n_grams, data_frame)
 
     def test_one_suitable_column(self):
         """
@@ -134,9 +134,9 @@ class TestSplitDfIntoNShigles(unittest.TestCase):
         """
         data = {"1": ["fdg", "cdg"], "2": ["abc", "cdg"]}
 
-        df = pd.DataFrame.from_dict(data, orient="index", columns=["text", "lest"])
+        data_frame = pd.DataFrame.from_dict(data, orient="index", columns=["text", "lest"])
 
-        self.assertRaises(ValueError, shm.split_lects_by_n_grams, df)
+        self.assertRaises(ValueError, shm.split_lects_by_n_grams, data_frame)
 
     def test_correct_params(self):
         """
@@ -145,10 +145,10 @@ class TestSplitDfIntoNShigles(unittest.TestCase):
         data = {"0": ["f dgfdg", "Smol"], "1": ["fd gfdg", "Pol"]}
         eval_data =  {"0": ["Smol", ["^f$","^dgf","dgfd","gfdg","fdg$"]],
                       "1": ["Pol", ["^fd$","^gfd","gfdg","fdg$"]]}
-        df = pd.DataFrame.from_dict(data, orient="index", columns=["text", "lect"])
+        data_frame = pd.DataFrame.from_dict(data, orient="index", columns=["text", "lect"])
         eval_df = pd.DataFrame.from_dict(eval_data, orient="index", columns=["lect", "n_grams"])
 
-        result_df = shm.split_lects_by_n_grams(df, 4)
+        result_df = shm.split_lects_by_n_grams(data_frame, 4)
 
         # transforming to dict to delete hidden pandas metadata
         # that do not influence final results
