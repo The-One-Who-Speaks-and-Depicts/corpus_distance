@@ -16,10 +16,15 @@ on lects and their respective n-grams from given pandas DataFrame (with columns
 n_grams and lect)
 
 """
+from logging import getLogger, NullHandler
 
+from numpy import array, issubdtype, integer
 from pandas import DataFrame
 
 from corpus_distance.cdutils import get_lects_from_dataframe
+
+logger = getLogger(__name__)
+logger.addHandler(NullHandler())
 
 
 def preprocess_token_for_split(token: list[str]) -> list[str]:
@@ -34,12 +39,14 @@ def preprocess_token_for_split(token: list[str]) -> list[str]:
     Returns:
         list[str]: sequence of characters with CLS and EOS, but without void symbol.
     """
+    logger.debug("Input params: %s", locals())
     # first of all, it is necessary to delete a special unicode empty symbol
     if ord(token[0]) == 65279:
         token.pop(0)
     # wrap token with special symbols of beginning and end
     token.insert(0, "^")
     token.append("$")
+    logger.debug("Result: %s", token)
     return token
 
 
@@ -57,6 +64,7 @@ def n_gram_split(text: str, n: int = 3) -> list[str]:
     Returns:
         n_grams(list[str]): list of n-grams from a given text
     """
+    logger.debug("Input params: %s", locals())
     if not isinstance(n, int):
         raise ValueError(f"n should be a positive integer, received {n}")
     if n < 1:
@@ -76,6 +84,7 @@ def n_gram_split(text: str, n: int = 3) -> list[str]:
             processed_token.pop(0)
         # otherwise, it just returns the rest
         n_grams.append(''.join(processed_token))
+    logger.debug("Result: %s", token)
     return n_grams
 
 def assign_n_grams_to_lects(df: DataFrame) -> dict:
@@ -91,6 +100,7 @@ def assign_n_grams_to_lects(df: DataFrame) -> dict:
         lect names as keys and n-gram arrays 
         as values
     """
+    logger.debug("Input params: %s", locals())
     if 'lect' not in df.columns or 'n_grams' not in df.columns:
         raise ValueError("No either \'lect\' or \'n_grams\' columns")
     lects = get_lects_from_dataframe(df)
@@ -99,6 +109,7 @@ def assign_n_grams_to_lects(df: DataFrame) -> dict:
         joined_n_grams = list(df[df['lect'] == l]['n_grams'])
         n_grams_for_lect = [j for i in joined_n_grams for j in i]
         n_grams_by_lects[l] = n_grams_for_lect
+    logger.debug("Result: %s", n_grams_by_lects)
     return n_grams_by_lects
 
 
@@ -115,8 +126,78 @@ def split_lects_by_n_grams(df: DataFrame, n: int = 3) -> DataFrame:
         n_gram_df(DataFrame): a transformed dataframe
         with lect/n-gram correspondences
     """
+    logger.debug("Input params: %s", locals())
     if 'lect' not in df.columns or 'text' not in df.columns:
         raise ValueError("No either \'lect\' or \'text\' columns")
     df['n_grams'] = df.apply(lambda x: n_gram_split(x['text'], n), axis=1)
     n_grams_by_lects = assign_n_grams_to_lects(df)
-    return DataFrame(n_grams_by_lects.items(), columns=['lect', 'n_grams'])
+    result = DataFrame(n_grams_by_lects.items(), columns=['lect', 'n_grams'])
+    logger.debug("Result: %s", n_grams_by_lects)
+    return result
+
+def get_length_of_shingle_list(data_frame: DataFrame, lect: str) -> int:
+    logger.debug("Input params: %s", locals())
+    if not isinstance(
+        data_frame, DataFrame
+        ) or not 'lect' in data_frame.columns or not 'n_grams' in data_frame.columns:
+        raise ValueError("data_frame should be a pandas DataFrame " \
+        f"with columns \'lect\' and \'n_grams\', received{data_frame}")
+    if not isinstance(lect, str) or not lect.strip() or not lect in list(data_frame["lect"]):
+        raise ValueError("lect should be a non-empty string present in the column \'lect\' "
+        f"of data_frame, received {lect}")
+    for _, row in data_frame.iterrows():
+        if row['lect'] == lect:
+            result = len(list(set(row['n_grams'])))
+            logger.debug("Result: %s", result)
+            return result
+
+def get_n_shingles_number_in_lect_by_n(data_frame: DataFrame, lects: list[str], n: int) -> dict:
+    logger.debug("Input params: %s", locals())
+    if not isinstance(
+        data_frame, DataFrame
+        ) or not 'lect' in data_frame.columns or not 'n_grams' in data_frame.columns:
+        raise ValueError("data_frame should be a pandas DataFrame " \
+        f"with columns \'lect\' and \'n_grams\', received{data_frame}")
+    if not isinstance(lects, list) or not all(
+        isinstance(x, str) for x in lects
+        ) or list(set(lects)) == list(set(list(data_frame['lect'].unique()))):
+        raise ValueError("lects should be a non-empty list of strings, equal to the unique values" \
+        f"of column \'lect\' in data_frame, received {lects}")
+    if not issubdtype(type(n), integer) or n < 1:
+        raise ValueError(f"n should be a positive integer, received {n}")
+    lects_split_by_n_grams = split_lects_by_n_grams(data_frame, n)
+    final_result = {
+        n: [get_length_of_shingle_list(lects_split_by_n_grams, lect) for lect in lects]
+    }
+    logger.debug("Result: %s", final_result)
+    return final_result
+        
+
+
+def get_n_shingles_number_by_lect(data_frame: DataFrame, init: int, limit: int):
+    logger.debug("Input params: %s", locals())
+    if not isinstance(
+            data_frame, DataFrame
+            ) or not 'lect' in data_frame.columns or not 'n_grams' in data_frame.columns:
+            raise ValueError("data_frame should be a pandas DataFrame " \
+            f"with columns \'lect\' and \'n_grams\', received{data_frame}")
+    if not issubdtype(type(init), integer) or init < 1:
+        raise ValueError(f"init should be a positive integer, received {init}")
+    if not issubdtype(type(limit), integer) or limit <= init:
+            raise ValueError(f"limit should be a positive integer bigger than init({init}), " \
+            f"received {limit}")
+    lects = get_lects_from_dataframe(data_frame)
+    by_lect_quantities = [
+        get_n_shingles_number_in_lect_by_n(data_frame, n) for n in range(init, limit)
+    ]
+    # TODO: sort out this part
+    quantities_dict = {}
+    for lect in lects:
+        quantities_dict[lect] = []
+        for pair in by_lect_quantities:
+            for lect_value in pair:
+                if lect_value[0] == lect:
+                    quantities_dict[lect].append(lect_value[1])
+        quantities_dict[lect] = array(quantities_dict[lect])
+    logger.debug("Result: %s", quantities_dict)
+    return quantities_dict
