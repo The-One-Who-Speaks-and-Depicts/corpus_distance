@@ -247,15 +247,15 @@ def save_topic_modelling_results(
     """
     logger.debug("Input params: %s", locals())
     if not isinstance(theme_df, DataFrame) or list(
-        set(theme_df.columns)
-        ) != list(set(['lect', 'text', 'text_topic_normalised'])):
+        sorted(theme_df.columns)
+        ) != list(sorted(['lect', 'text', 'text_topic_normalised'])):
         raise ValueError("theme_df should be a pandas DataFrame with" \
                           "columns \'lect\', \'text\' and \'text_topic_normalised\', " \
                           f"received {theme_df}")
-    if not isinstance(topic_words, dict) or list(set(
+    if not isinstance(topic_words, dict) or list(sorted(
         topic_words.keys()
     )) != list(
-        set(theme_df['lect'].unique())
+        sorted(theme_df['lect'].unique())
         ):
         raise ValueError("topic_words should be a dictionary with the same lects as keys" \
         f" as values in the theme_df \'lect\' column, received {topic_words}")

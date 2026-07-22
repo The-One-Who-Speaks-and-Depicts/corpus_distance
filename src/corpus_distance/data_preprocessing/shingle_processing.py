@@ -18,7 +18,7 @@ n_grams and lect)
 """
 from logging import getLogger, NullHandler
 
-from numpy import array, issubdtype, integer
+from numpy import array, issubdtype, integer, ndarray
 from pandas import DataFrame
 
 from corpus_distance.cdutils import get_lects_from_dataframe
@@ -147,34 +147,14 @@ def get_length_of_shingle_list(data_frame: DataFrame, lect: str) -> int:
         f"of data_frame, received {lect}")
     for _, row in data_frame.iterrows():
         if row['lect'] == lect:
+            # TODO: set?
             result = len(list(set(row['n_grams'])))
             logger.debug("Result: %s", result)
             return result
 
-def get_n_shingles_number_in_lect_by_n(data_frame: DataFrame, lects: list[str], n: int) -> dict:
-    logger.debug("Input params: %s", locals())
-    if not isinstance(
-        data_frame, DataFrame
-        ) or not 'lect' in data_frame.columns or not 'n_grams' in data_frame.columns:
-        raise ValueError("data_frame should be a pandas DataFrame " \
-        f"with columns \'lect\' and \'n_grams\', received{data_frame}")
-    if not isinstance(lects, list) or not all(
-        isinstance(x, str) for x in lects
-        ) or list(set(lects)) == list(set(list(data_frame['lect'].unique()))):
-        raise ValueError("lects should be a non-empty list of strings, equal to the unique values" \
-        f"of column \'lect\' in data_frame, received {lects}")
-    if not issubdtype(type(n), integer) or n < 1:
-        raise ValueError(f"n should be a positive integer, received {n}")
-    lects_split_by_n_grams = split_lects_by_n_grams(data_frame, n)
-    final_result = {
-        n: [get_length_of_shingle_list(lects_split_by_n_grams, lect) for lect in lects]
-    }
-    logger.debug("Result: %s", final_result)
-    return final_result
-        
-
-
-def get_n_shingles_number_by_lect(data_frame: DataFrame, init: int, limit: int):
+def get_n_shingles_number_by_lect(
+        data_frame: DataFrame, init: int, limit: int
+        ) -> dict[str, ndarray]:
     logger.debug("Input params: %s", locals())
     if not isinstance(
             data_frame, DataFrame
@@ -187,17 +167,11 @@ def get_n_shingles_number_by_lect(data_frame: DataFrame, init: int, limit: int):
             raise ValueError(f"limit should be a positive integer bigger than init({init}), " \
             f"received {limit}")
     lects = get_lects_from_dataframe(data_frame)
-    by_lect_quantities = [
-        get_n_shingles_number_in_lect_by_n(data_frame, n) for n in range(init, limit)
-    ]
-    # TODO: sort out this part
-    quantities_dict = {}
-    for lect in lects:
-        quantities_dict[lect] = []
-        for pair in by_lect_quantities:
-            for lect_value in pair:
-                if lect_value[0] == lect:
-                    quantities_dict[lect].append(lect_value[1])
-        quantities_dict[lect] = array(quantities_dict[lect])
+    quantities_dict = {lect: [] for lect in lects}
+    for idx in range(init, limit):
+        lects_split_by_n_grams = split_lects_by_n_grams(data_frame, idx)
+        for lect in lects:
+            length_n_grams_lect = get_length_of_shingle_list(lects_split_by_n_grams, lect)
+            quantities_dict[lect].append(length_n_grams_lect)
     logger.debug("Result: %s", quantities_dict)
     return quantities_dict
