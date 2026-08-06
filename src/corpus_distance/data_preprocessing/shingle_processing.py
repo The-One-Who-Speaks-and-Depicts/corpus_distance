@@ -147,7 +147,6 @@ def get_length_of_shingle_list(data_frame: DataFrame, lect: str) -> int:
         f"of data_frame, received {lect}")
     for _, row in data_frame.iterrows():
         if row['lect'] == lect:
-            # TODO: set?
             result = len(list(set(row['n_grams'])))
             logger.debug("Result: %s", result)
             return result
@@ -158,9 +157,9 @@ def get_n_shingles_number_by_lect(
     logger.debug("Input params: %s", locals())
     if not isinstance(
             data_frame, DataFrame
-            ) or not 'lect' in data_frame.columns or not 'n_grams' in data_frame.columns:
+            ) or not 'lect' in data_frame.columns or not 'text' in data_frame.columns:
             raise ValueError("data_frame should be a pandas DataFrame " \
-            f"with columns \'lect\' and \'n_grams\', received{data_frame}")
+            f"with columns \'lect\' and \'text\', received{data_frame}")
     if not issubdtype(type(init), integer) or init < 1:
         raise ValueError(f"init should be a positive integer, received {init}")
     if not issubdtype(type(limit), integer) or limit <= init:
