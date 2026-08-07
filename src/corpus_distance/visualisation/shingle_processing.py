@@ -77,7 +77,7 @@ def plot_shingle_diversity_barchart(
 
     return fig
 
-def plot_shingle_variance(
+def plot_shingle_std(
     quantities_dict: dict,
     bottom_limit: int = 1,
     upper_limit: int = 16) -> Figure:
@@ -100,13 +100,13 @@ def plot_shingle_variance(
     font = {'family':'DejaVu Sans', 'weight':'normal', 'size':20}
     rc('font', **font)
     fig, ax = subplots(figsize=(40, 15), dpi = 300)
-    variances = []
+    st_deviations = []
     for i in range(0, upper_limit - bottom_limit):
         n_quantity = []
         for lect in quantities_dict.keys():
             n_quantity.append(quantities_dict[lect][i])
-        variances.append(std(n_quantity))
-    ax.plot(range(bottom_limit, upper_limit), variances, color="#009E73", linestyle='-', linewidth=2, marker='o')
+        st_deviations.append(std(n_quantity))
+    ax.plot(range(bottom_limit, upper_limit), st_deviations, color="#009E73", linestyle='-', linewidth=2, marker='o')
     # Defining a palette of shades of gray (do not worry there is not 50 of them)
     GREY10 = "#1a1a1a"
     GREY30 = "#4d4d4d"
@@ -141,7 +141,7 @@ def plot_shingle_variance(
     ax.xaxis.majorTicks[0].label1.set_horizontalalignment('left')
     ax.xaxis.majorTicks[6].label1.set_horizontalalignment('right')
 
-    HLINES = arange(0, max(variances) + max(variances)/len(variances), max(variances)/len(variances))
+    HLINES = arange(0, max(st_deviations) + max(st_deviations)/len(st_deviations), max(st_deviations)/len(st_deviations))
 
     # Y-axis: Add vertical gridlines every 2 billion tons
     for h in HLINES:
@@ -160,7 +160,7 @@ def plot_shingle_variance(
         color=GREY10
     )
 
-    y_end_value = variances[-1]
+    y_end_value = st_deviations[-1]
     y_offset = 0.5
     annotation_x = upper_limit - 0.8
     annotation_y = y_end_value + y_offset
@@ -169,8 +169,8 @@ def plot_shingle_variance(
         color=GREY10, fontsize=24, weight="650", va="center"
     )
 
-    min_y = min(variances)
-    min_x = range(bottom_limit, upper_limit)[argmin(variances)]
+    min_y = min(st_deviations)
+    min_x = range(bottom_limit, upper_limit)[argmin(st_deviations)]
     plot(min_x, min_y, marker="$𖣠$", markersize=38, color="#D55E00", label="Maximum")
 
     
