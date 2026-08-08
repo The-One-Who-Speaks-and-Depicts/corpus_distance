@@ -39,7 +39,7 @@ jobs:
           pip install pytest-cov
       - name: Run pytest with coverage report
         run:
-          python3 -m pytest --cov-report term --cov=src/corpus_distance
+           python -m pytest --cov-report term-missing --cov=src/  --no-cov-on-fail --cov-fail-under=40
 
 
   check-version-change:
