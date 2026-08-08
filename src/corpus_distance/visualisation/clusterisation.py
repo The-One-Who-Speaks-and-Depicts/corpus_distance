@@ -3,12 +3,12 @@ from os.path import join
 from matplotlib import rc
 from matplotlib.pyplot import Figure, figure, ylabel, close, axis, savefig, tight_layout
 
-from pandas import DataFrame
 
 import networkx as nx
-import fastnntpy as fn
 from Bio.Phylo import draw
 from Bio.Phylo.BaseTree import Tree
+
+from corpus_distance.clusterisation.clusterisation import NetworkParams
 
 
 def visualise_tree(tree: Tree, metrics: str, data_name: str,
@@ -42,53 +42,24 @@ def visualise_tree(tree: Tree, metrics: str, data_name: str,
     close()
     return fig
 
-def visualise_network(matrix: list[list[int|float]],
-                      lects: list[str],
+def visualise_network(params: NetworkParams,
                       out_path,
                       metrics_name: str,
-                      shift=0, node_size=10, font_size=7,
-                      scale_width_by_weight=False, dpi=300,
-                      ) -> None:
-    data_frame = DataFrame(matrix, columns=lects)
-    nx_obj = fn.run_neighbour_net(data_frame)
-    # -- data from PyNexus --
-    labels = {i + shift: s for i, s in nx_obj.get_node_translations()}
-    pos    = {i + shift: (x, y) for i, x, y in nx_obj.get_node_positions()}
-    # corrected parsing order: (edge_id, u, v, sid, w)
-    edges_raw = [ (u + shift, v + shift, w)
-                  for (_, u, v, _, w) in nx_obj.get_graph_edges() ]
+                      node_size=10, font_size=7,
+                      dpi=300,
+                      widths: float=0.8,
+                      ) -> Figure:
+    
+    fig = figure(figsize=(8, 8), dpi=dpi)
 
-    # only keep edges whose endpoints have positions
-    edges = [(u, v, w) for (u, v, w) in edges_raw if u in pos and v in pos]
-    if not edges:
-        raise ValueError("No drawable edges (endpoints missing positions).")
+    nx.draw_networkx_edges(params.graph, params.pos, width=widths, edge_color="black", alpha=0.9)
+    nx.draw_networkx_nodes(params.graph, params.pos, nodelist=params.leaves, node_size=node_size, node_color="black")
 
-    # -- build graph --
-    G = nx.Graph()
-    for u, v, w in edges:
-        G.add_edge(u, v, weight=w)
-
-    # leaves only (degree == 1)
-    leaves = [n for n, d in G.degree() if d == 1]
-
-    # edge widths (optional)
-    if scale_width_by_weight:
-        ws = [G[u][v].get("weight", 1.0) for u, v in G.edges()]
-        wmax = max(ws) if ws else 1.0
-        widths = [0.5 + 2.5 * (w / wmax) for w in ws]
-    else:
-        widths = 0.8
-
-    # -- draw (no layout) --
-    figure(figsize=(8, 8), dpi=dpi)
-
-    nx.draw_networkx_edges(G, pos, width=widths, edge_color="black", alpha=0.9)
-    nx.draw_networkx_nodes(G, pos, nodelist=leaves, node_size=node_size, node_color="black")
-
-    leaf_labels = {n: labels.get(n, str(n)) for n in leaves}
-    nx.draw_networkx_labels(G, pos, labels=leaf_labels, font_size=font_size)
+    leaf_labels = {n: params.labels.get(n, str(n)) for n in params.leaves}
+    nx.draw_networkx_labels(params.graph, params.pos, labels=leaf_labels, font_size=font_size)
 
     axis("equal"); axis("off"); tight_layout(pad=0.02)
     savefig(join(out_path, "nn_" + metrics_name + ".png"), dpi=dpi, bbox_inches="tight", pad_inches=0.01)
     savefig(join(out_path, "nn_" + metrics_name + ".svg"), bbox_inches="tight", pad_inches=0.01)
     close()
+    return fig

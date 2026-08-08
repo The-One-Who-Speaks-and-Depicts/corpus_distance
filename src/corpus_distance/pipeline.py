@@ -13,9 +13,11 @@ from corpus_distance.data_preprocessing.data_pipeline\
 from corpus_distance.data_preprocessing.topic_modelling import LDAParams
 from corpus_distance.data_preprocessing.vectorisation import FastTextParams
 from corpus_distance.distance_measurement.hybridisation import HybridisationParameters
-from corpus_distance.clusterisation.clusterisation import ClusterisationParameters
+from corpus_distance.clusterisation.pipeline import (
+    ClusterisationParameters,
+    clusterise_lects_from_distance_matrix
+)
 from corpus_distance.distance_measurement.metrics_pipeline import score_metrics_for_corpus_dataset
-from corpus_distance.clusterisation.clusterisation import clusterise_lects_from_distance_matrix
 from corpus_distance.data.data_resources import config
 
 logger = getLogger(__name__)
