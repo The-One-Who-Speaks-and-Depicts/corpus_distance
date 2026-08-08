@@ -1,23 +1,54 @@
 """
-Shingle processing module aims at splitting the text by n-grams
-(character 3-grams) for the purposes of enhancing dataset size and 
-presence of variation variables within it. Also adds frequency-based
-information to the given lect
+Shingle processing module aims at splitting the text by character n-grams
+for the purposes of enhancing dataset size and 
+presence of variation variables within it.
+
+The module contains the following functions:
+
+* ENTRY: split_lects_by_n_grams(df: pd.DataFrame, n: int = 3) -> pd.DataFrame: splits the texts
+in dataframe into character sequences (default n = 3).
+* n_gram_split(text: str, n: int = 3) -> list[str]: splits a given text string
+into a sequence of character n-grams, with default n being 3
+* preprocess_token_for_split(token: list[str]) -> list[str]: deletes problematic technical
+symbols and adds CLS (^) and EOS ($) symbols
+* assign_n_grams_to_lects(df: pd.DataFrame) -> dict: extracts information
+on lects and their respective n-grams from given pandas DataFrame (with columns
+n_grams and lect)
+
 """
 
 from pandas import DataFrame
 
 from corpus_distance.cdutils import get_lects_from_dataframe
 
-def n_gram_split(text: str) -> list[str]:
+
+def preprocess_token_for_split(token: list[str]) -> list[str]:
     """
-    The first stage of data preprocessing is splitting tokens into character 3-grams. 
+    Takes the list of symbols, deletes void symbols that randomly appear
+    in the beginning of the string,
+    and adds ^ and $ symbols as CLS and EOS.
+
+    Arguments:
+        token(list[str]): string as a sequence of characters.
+
+    Returns:
+        list[str]: sequence of characters with CLS and EOS, but without void symbol.
+    """
+    # first of all, it is necessary to delete a special unicode empty symbol
+    if ord(token[0]) == 65279:
+        token.pop(0)
+    # wrap token with special symbols of beginning and end
+    token.insert(0, "^")
+    token.append("$")
+    return token
+
+
+def n_gram_split(text: str, n: int = 3) -> list[str]:
+    """
+    The first stage of data preprocessing is splitting tokens into character n-grams. 
     The character n-grams help to find coinciding sequences more easily, 
-    than tokens or token n-grams. 
-    Specifically 3-grams help to underscore the exact places where the change is happening, 
-    providing minimal left and right context for each symbol within the sequence. 
-    Adding special symbols ^ and $ to the start and the end of each sequence 
-    helps to do this for
+    than tokens or token n-grams. Adding special symbols ^ and $ to the start
+    and the end of each sequence helps to do this for
     the first and the last symbol of the given sequence as well.
 
     Arguments:
@@ -26,34 +57,25 @@ def n_gram_split(text: str) -> list[str]:
     Returns:
         n_grams(list[str]): list of n-grams from a given text
     """
+    if not isinstance(n, int):
+        raise ValueError(f"n should be a positive integer, received {n}")
+    if n < 1:
+        raise ValueError(f"n should be a positive integer, received {n}")
     n_grams = []
-    for j in text.split():
-        if j and j.strip():
-            s = list(j)
-            # deleting void first symbol, if present
-            if ord(j[0]) == 65279:
-                s.pop(0)
-            s = ''.join(s)
-            # assigning 3-gram for each symbol within the sequence
-            for k in list(enumerate(s)):
-                # if the sequence consists of only one symbol,
-                # surrounding it by special tokens
-                if k[0] == 0 and (len(s) == 1):
-                    n_grams.append(''.join(['^', k[1],'$']))
-                    continue
-                # if the current symbol is the first within the sequence,
-                # add special token ^ before it
-                if k[0] == 0:
-                    n_grams.append(''.join(['^', k[1], s[k[0] + 1]]))
-                    continue
-                # if the current symbol is the last within the sequence,
-                # add special token $ after it
-                if k[0] == (len(s) - 1):
-                    n_grams.append(''.join([s[k[0] - 1], k[1], '$']))
-                    continue
-                # in any other case, return
-                # previous, current and following symbols
-                n_grams.append(''.join([s[k[0] - 1], k[1], s[k[0] + 1]]))
+    # the next string splits sequence into pre-detected tokens,
+    # and transforms these tokens into a list of characters each
+    # to form character n-grams
+    split_tokens = [list(tok) for tok in text.split() if tok and tok.strip()]
+    for token in split_tokens:
+        processed_token = preprocess_token_for_split(token)
+        # if there is more symbols left in token than n, required for n-grams,
+        # the algorithm takes exactly n symbols and deletes the first one
+        # from the token
+        while len(processed_token) > n:
+            n_grams.append(''.join(processed_token[0:n]))
+            processed_token.pop(0)
+        # otherwise, it just returns the rest
+        n_grams.append(''.join(processed_token))
     return n_grams
 
 def assign_n_grams_to_lects(df: DataFrame) -> dict:
@@ -80,7 +102,7 @@ def assign_n_grams_to_lects(df: DataFrame) -> dict:
     return n_grams_by_lects
 
 
-def split_lects_by_n_grams(df: DataFrame) -> DataFrame:
+def split_lects_by_n_grams(df: DataFrame, n: int = 3) -> DataFrame:
     """
     Takes a dataframe of text/lect correspondences,
     and transforms it into a dataframe of 
@@ -95,6 +117,6 @@ def split_lects_by_n_grams(df: DataFrame) -> DataFrame:
     """
     if 'lect' not in df.columns or 'text' not in df.columns:
         raise ValueError("No either \'lect\' or \'text\' columns")
-    df['n_grams'] = df.apply(lambda x: n_gram_split(x['text']), axis=1)
+    df['n_grams'] = df.apply(lambda x: n_gram_split(x['text'], n), axis=1)
     n_grams_by_lects = assign_n_grams_to_lects(df)
     return DataFrame(n_grams_by_lects.items(), columns=['lect', 'n_grams'])

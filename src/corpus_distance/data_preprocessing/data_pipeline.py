@@ -6,12 +6,13 @@ a more comfortable user experience
 from dataclasses import dataclass, field
 from os.path import exists
 from pandas import DataFrame
-import corpus_distance.data_preprocessing.data_loading as loading
-from corpus_distance import cdutils
-import corpus_distance.data_preprocessing.shingle_processing as sp
-import corpus_distance.data_preprocessing.vectorisation as vec
-import corpus_distance.data_preprocessing.topic_modelling as tm
-import corpus_distance.data_preprocessing.frequency_scoring as freqscore
+from corpus_distance.data_preprocessing import (
+    data_loading as loading,
+    shingle_processing as sp,
+    vectorisation as vec,
+    topic_modelling as tm,
+    frequency_scoring as freqscore
+)
 
 @dataclass
 class DatasetPreprocessingParams:
@@ -78,15 +79,18 @@ def assemble_dataset(
             data_params.dataset_params.content_path,
             data_params.dataset_params.split
             )
-    lects = cdutils.get_lects_from_dataframe(df)
     lects_with_topics = tm.get_topic_words_for_lects(
-        df, lects, data_params.lda_params
+        df, data_params.lda_params
         )
     df = tm.add_topic_modelling(
         df,
-        data_params.dataset_params.store_path,
         lects_with_topics,
         data_params.dataset_params.topic_modelling)
+    tm.save_topic_modelling_results(
+        lects_with_topics,
+        df,
+        data_params.dataset_params.store_path
+    )
     vecs = vec.create_vectors_for_lects(
         df, data_params.dataset_params.store_path, data_params.fasttext_params)
     df = sp.split_lects_by_n_grams(df)
