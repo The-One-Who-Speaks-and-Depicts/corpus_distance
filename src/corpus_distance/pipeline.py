@@ -6,18 +6,18 @@ from dataclasses import dataclass, field
 import importlib
 import json
 from logging import getLogger, NullHandler
-from os import mkdir, listdir
-from os.path import exists
 from Bio.Phylo.TreeConstruction import DistanceTreeConstructor
-from corpus_distance.cdutils import get_lects_from_dataframe
+from corpus_distance.cdutils import get_lects_from_dataframe, create_and_set_storage_directory
 from corpus_distance.data_preprocessing.data_pipeline\
     import assemble_dataset, DataParameters, DatasetPreprocessingParams
 from corpus_distance.data_preprocessing.topic_modelling import LDAParams
 from corpus_distance.data_preprocessing.vectorisation import FastTextParams
 from corpus_distance.distance_measurement.hybridisation import HybridisationParameters
-from corpus_distance.clusterisation.clusterisation import ClusterisationParameters
+from corpus_distance.clusterisation.pipeline import (
+    ClusterisationParameters,
+    clusterise_lects_from_distance_matrix
+)
 from corpus_distance.distance_measurement.metrics_pipeline import score_metrics_for_corpus_dataset
-from corpus_distance.clusterisation.clusterisation import clusterise_lects_from_distance_matrix
 from corpus_distance.data.data_resources import config
 
 logger = getLogger(__name__)
@@ -46,30 +46,6 @@ class ConfigurationParameters:
     clusterisation_parameters: ClusterisationParameters = field(
         default_factory=ClusterisationParameters
         )
-
-
-def create_and_set_storage_directory(store_path: str) -> str:
-    """
-    Sets directory for experiment results, in case of its absence,
-    creates it. In case the directory is not empty, throws warning in logs,
-    but stores files in the directory nonetheless.
-
-    Parameters:
-        store_path(str): initial path to directory, where a package will store the results
-    Returns:
-        store_path(str): final path to directory, where a package will store the results
-    """
-    if not store_path or not isinstance(store_path, str):
-        raise ValueError("Storage directory name is not a non-empty string")
-    if not exists(store_path):
-        logger.info("Creating directory %s", store_path)
-        mkdir(store_path)
-    if len(listdir(store_path)) > 0:
-        logger.warning(
-            "Storage directory %s is not empty, consider choosing the other one", store_path
-            )
-    logger.info("Storage directory set to %s", store_path)
-    return store_path
 
 
 def set_dataset_params(dataset_cfg: dict) -> DatasetPreprocessingParams:

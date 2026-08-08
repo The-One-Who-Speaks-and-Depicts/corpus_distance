@@ -4,13 +4,14 @@ split of lects into groups,
 based on the results of distance measurements, conducted earlier.
 """
 from logging import getLogger, NullHandler
-from os.path import isdir, dirname, realpath
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable
+from pandas import DataFrame
 from Bio.Phylo.BaseTree import Tree
 from Bio.Phylo.TreeConstruction import _DistanceMatrix, DistanceTreeConstructor
-from corpus_distance.clusterisation import utils
+from fastnntpy import run_neighbour_net, Nexus
 
+import networkx as nx
 logger = getLogger(__name__)
 logger.addHandler(NullHandler())
 
@@ -35,55 +36,47 @@ def get_tree(distance_matrix: _DistanceMatrix,
     tree = classification_method(distance_matrix)
     return tree
 
+
+
+def create_neigbour_net_graph(nx_obj: Nexus, pos: dict[int, tuple[float, float]], shift: int = 0) -> nx.Graph:
+    # corrected parsing order: (edge_id, u, v, sid, w)
+    edges_raw = [ (u + shift, v + shift, w)
+                  for (_, u, v, _, w) in nx_obj.get_graph_edges() ]
+    
+    # only keep edges whose endpoints have positions
+    edges = [(u, v, w) for (u, v, w) in edges_raw if u in pos and v in pos]
+    if not edges:
+        raise ValueError("No drawable edges (endpoints missing positions).")
+    
+    # -- build graph --
+    G = nx.Graph()
+    for u, v, w in edges:
+        G.add_edge(u, v, weight=w)
+    return G
 @dataclass
-class ClusterisationParameters:
-    """
-    Clusterisation parameters contains the main information on 
-    how to cluster given lects
+class NetworkParams():
+    graph: nx.Graph
+    labels: dict[int, str]
+    pos: dict[int, tuple[float, float]]
+    leaves: list[str]
 
-    Parameters:
-        lects(list[str]): names of lects
-        classification_method(Callable): a function that returns a Phylo object
-        on the basis a given distance matrix in a lower triangular format
-        data_name(str): a name of dataset
-        outgroup(str): a proposed outgroup
-        metrics(str): a name of metrics, used for hybridisation
-        store_path(str): a path to store data
-    """
-    lects: list[str] = field(default_factory=list)
-    outgroup: str = "default_outgroup"
-    data_name: str = "default_data_name"
-    metrics: str = "default_metrics_name"
-    classification_method: Callable = DistanceTreeConstructor().upgma
-    store_path: str = dirname(realpath(__file__))
+def create_neighbour_net_params(matrix: list[list[int|float]], lects: list[str], shift: int = 0) -> NetworkParams:
+    data_frame = DataFrame(matrix, columns=lects)
 
-def clusterise_lects_from_distance_matrix(
-        pairwise_distances: list[tuple[tuple[str,str], int|float]],
-        clusterisation_parameters: ClusterisationParameters) -> None:
-    """
-    A function that takes acquired distances between lect pairs, and creates tree,
-    required information about it, and visualisation
+    nx_obj = run_neighbour_net(data_frame)
+    
+    pos    = {i + shift: (x, y) for i, x, y in nx_obj.get_node_positions()}
+    graph = create_neigbour_net_graph(nx_obj, pos, shift)
+    labels = {i + shift: s for i, s in nx_obj.get_node_translations()}
+    
+    network = NetworkParams(
+        graph=graph,
+        labels=labels,
+        pos=pos,
+        leaves=[n for n, d in graph.degree() if d == 1]
+    )
 
-    Parameters:
-        pairwise_distances(list[tuple[tuple[str,str], int|float]]): a 1d-array
-        of tuples that contain lect pairs and distances between given lects
-        clusterisation_parameters(ClusterisationParameters): parameters for clusterisation
-    """
-    if not isdir(clusterisation_parameters.store_path):
-        raise ValueError("Directory does not exist")
-    logger.info('Distances are %s', pairwise_distances)
-    distance_matrix = utils.create_distance_matrix(pairwise_distances,
-                                                   clusterisation_parameters.lects)
-    logger.info('Distance matrix is %s', distance_matrix)
-    tree = get_tree(distance_matrix,
-                    clusterisation_parameters.classification_method)
-    logger.info('Tree is %s', tree)
-    utils.detect_outgroup(tree,
-                          clusterisation_parameters.outgroup,
-                          clusterisation_parameters.data_name,
-                          clusterisation_parameters.metrics,
-                          clusterisation_parameters.store_path)
-    utils.visualise_tree(tree,
-                         clusterisation_parameters.metrics,
-                         clusterisation_parameters.data_name,
-                         clusterisation_parameters.store_path)
+    logger.debug("Result: %s", network)
+    return network
+
+

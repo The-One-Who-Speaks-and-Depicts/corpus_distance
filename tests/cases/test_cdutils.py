@@ -1,14 +1,18 @@
 """
 Contains tests of the corpus_distance/cdutils module.
 """
+from os import mkdir
+from os.path import join
 import unittest
 
+from shutil import rmtree
 import pandas as pd
 
 from corpus_distance.cdutils import (
     clear_stop_words, return_topic_words,
     get_lects_from_dataframe, get_unique_pairs, LectPair,
-    get_to_0_1, delete_outliers
+    get_to_0_1, delete_outliers,
+    create_and_set_storage_directory
 )
 
 class TestClearStopWords(unittest.TestCase):
@@ -333,3 +337,64 @@ class TestGetUniquePairs(unittest.TestCase):
         result = get_unique_pairs(lects)
 
         self.assertEqual(expected, result)
+
+class TestCreateAndSetStorageDirectory(unittest.TestCase):
+    """
+    Contains tests for the create_and_set_storage_directory function.
+    """
+
+    def tearDown(self):
+        rmtree("exp_1", ignore_errors=True)
+
+    def test_create_and_set_storage_directory_negative_cases(self):
+        test_cases = [
+            {
+                "dir": case
+            } for case in [
+                0,
+                0.5,
+                1,
+                {},
+                {'f': 1},
+                {1: 'f'},
+                {'f': 'f'},
+                [],
+                ['gfg'],
+                '',
+                ' '
+                ]
+                ]
+
+        for case in test_cases:
+            with self.subTest(data=case):
+                self.assertRaises(
+                    ValueError,
+                    create_and_set_storage_directory,
+                    case["dir"]
+                    )
+    
+    def test_create_and_set_storage_directory_existing_dir_with_files(self):
+        """
+        Assures the function throws a warning in case the provided directory
+        exists and contains some files.
+        """
+        dir = "exp_1"
+        mkdir(dir)
+        with open(join(dir, "dummy.txt"), 'w', encoding='utf-8') as file_input:
+            file_input.write('dummy')
+
+        self.assertWarns(UserWarning, create_and_set_storage_directory, dir)
+
+    
+    def test_create_and_set_storage_directory_not_existing_dir(self):
+        """
+        Assures the function works correctly, if the directory had not existed before its call.
+        """
+        dir = "exp_1"
+
+        result = create_and_set_storage_directory(dir)
+
+        self.assertEqual(result, dir)
+
+if __name__ == '__main__':
+    unittest.main()
